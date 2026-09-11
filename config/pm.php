@@ -11,4 +11,9 @@ return [
         'email' => env('SEED_USER_EMAIL', 'ayan@example.com'),
         'password' => env('SEED_USER_PASSWORD', 'password'),
     ],
+
+    'backup' => [
+        'relative_path' => env('DB_BACKUP_PATH', 'app/backups/daily.sql'),
+        'dump_binary' => env('DB_DUMP_BINARY'),
+    ],
 ];

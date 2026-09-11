@@ -54,6 +54,34 @@ php artisan queue:work
 
 ---
 
+## Daily database backup
+
+Creates one file and overwrites it on every run:
+
+```text
+storage/app/backups/daily.sql
+```
+
+Run now:
+
+```powershell
+php artisan db:backup
+```
+
+This is scheduled every day at 2:00 AM. It only runs if the scheduler cron is active:
+
+```text
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+If `mysqldump` is not on PATH, set the full path in `.env`:
+
+```env
+DB_DUMP_BINARY=C:\wamp64\bin\mysql\mysql8.4.7\bin\mysqldump.exe
+```
+
+---
+
 ## Deadline reminders
 
 Send reminders now:
