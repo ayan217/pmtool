@@ -1,0 +1,198 @@
+:root {
+    --pm-sidebar: #1c2430;
+    --pm-sidebar-hover: #273140;
+    --pm-accent: #c05621;
+    --pm-ink: #1c2430;
+    --pm-muted: #667085;
+    --pm-bg: #f4f1ea;
+    --pm-card: #fffdf8;
+    --pm-line: #e6dfd2;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body.app-body {
+    background: var(--pm-bg);
+    color: var(--pm-ink);
+    font-family: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+}
+
+.app-shell {
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--pm-sidebar);
+    color: #f6f1e8;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1.4rem 1rem;
+}
+
+.sidebar-brand {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
+    padding: 0 0.6rem 1.2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 1rem;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.sidebar-nav a,
+.sidebar-nav button {
+    color: #d7d0c3;
+    text-decoration: none;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav button:hover,
+.sidebar-nav a.active {
+    background: var(--pm-sidebar-hover);
+    color: #fff;
+}
+
+.sidebar-nav .logout-form {
+    margin-top: auto;
+}
+
+.app-main {
+    flex: 1;
+    min-width: 0;
+    padding: 1.5rem;
+}
+
+.page-title {
+    font-weight: 650;
+    letter-spacing: -0.02em;
+}
+
+.page-kicker {
+    color: var(--pm-muted);
+    font-size: 0.92rem;
+}
+
+.pm-card {
+    background: var(--pm-card);
+    border: 1px solid var(--pm-line);
+    border-radius: 0.9rem;
+    box-shadow: none;
+}
+
+.stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-card.overdue {
+    border-color: #e7b6b0;
+    background: #fff5f3;
+}
+
+.badge-dev {
+    background: #2457d6;
+    color: #fff;
+}
+
+.badge-client {
+    background: #c05621;
+    color: #fff;
+}
+
+.table thead th {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--pm-muted);
+    border-bottom-color: var(--pm-line);
+}
+
+.task-link {
+    color: var(--pm-ink);
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.task-link:hover {
+    color: var(--pm-accent);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.comment-item {
+    position: relative;
+    padding-left: 1.4rem;
+}
+
+.comment-item::before {
+    content: "";
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--pm-accent);
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+}
+
+.quick-filters .btn {
+    border-radius: 999px;
+}
+
+.mobile-navbar {
+    background: var(--pm-sidebar);
+}
+
+.deadline-overdue {
+    color: #b42318;
+    font-weight: 650;
+}
+
+.auth-wrap {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(circle at top left, rgba(192, 86, 33, 0.12), transparent 36%),
+        var(--pm-bg);
+}
+
+.auth-card {
+    width: min(440px, calc(100% - 2rem));
+}
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        display: none;
+    }
+
+    .app-main {
+        padding: 1rem;
+    }
+}

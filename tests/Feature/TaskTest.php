@@ -1,0 +1,145 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\TaskPriority;
+use App\Enums\TaskStatus;
+use App\Models\Project;
+use App\Models\Task;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class TaskTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::factory()->create();
+    }
+
+    public function test_task_creation(): void
+    {
+        $response = $this->actingAs($this->user)->post('/tasks', [
+            'title' => 'Fix WhatsApp Notification',
+            'developer' => 'Rahul',
+            'priority' => TaskPriority::High->value,
+            'status' => TaskStatus::Pending->value,
+            'description' => 'Implement WhatsApp notification.',
+            'notes' => 'Check the existing template.',
+        ]);
+
+        $task = Task::query()->first();
+
+        $response->assertRedirect(route('tasks.show', $task));
+        $this->assertDatabaseHas('tasks', [
+            'title' => 'Fix WhatsApp Notification',
+            'developer' => 'Rahul',
+            'project_id' => null,
+        ]);
+    }
+
+    public function test_standalone_task_creation(): void
+    {
+        $this->actingAs($this->user)->post('/tasks', $this->payload([
+            'title' => 'Fix Production Login Issue',
+            'project_id' => '',
+        ]))->assertRedirect();
+
+        $this->assertDatabaseHas('tasks', [
+            'title' => 'Fix Production Login Issue',
+            'project_id' => null,
+        ]);
+    }
+
+    public function test_project_associated_task_creation(): void
+    {
+        $project = Project::factory()->create(['name' => 'CRM Tool']);
+
+        $this->actingAs($this->user)->post('/tasks', $this->payload([
+            'title' => 'Add Customer Import',
+            'project_id' => $project->id,
+        ]))->assertRedirect();
+
+        $this->assertDatabaseHas('tasks', [
+            'title' => 'Add Customer Import',
+            'project_id' => $project->id,
+        ]);
+    }
+
+    public function test_task_update(): void
+    {
+        $task = Task::factory()->create(['title' => 'Old title']);
+
+        $this->actingAs($this->user)
+            ->put(route('tasks.update', $task), $this->payload([
+                'title' => 'Updated title',
+                'priority' => TaskPriority::Urgent->value,
+                'status' => TaskStatus::InProgress->value,
+            ]))
+            ->assertRedirect(route('tasks.show', $task));
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task->id,
+            'title' => 'Updated title',
+            'priority' => TaskPriority::Urgent->value,
+            'status' => TaskStatus::InProgress->value,
+        ]);
+    }
+
+    public function test_task_completion(): void
+    {
+        $task = Task::factory()->create();
+
+        $this->actingAs($this->user)
+            ->post(route('tasks.complete', $task))
+            ->assertRedirect();
+
+        $task->refresh();
+
+        $this->assertSame(TaskStatus::Completed, $task->status);
+        $this->assertNotNull($task->completed_at);
+    }
+
+    public function test_task_archiving_and_restore(): void
+    {
+        $task = Task::factory()->create(['status' => TaskStatus::InProgress]);
+
+        $this->actingAs($this->user)
+            ->post(route('tasks.archive', $task))
+            ->assertRedirect();
+
+        $task->refresh();
+        $this->assertTrue($task->isArchived());
+        $this->assertSame(TaskStatus::InProgress, $task->previous_status);
+
+        $this->actingAs($this->user)
+            ->post(route('tasks.restore', $task))
+            ->assertRedirect();
+
+        $task->refresh();
+        $this->assertSame(TaskStatus::InProgress, $task->status);
+        $this->assertNull($task->archived_at);
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    protected function payload(array $overrides = []): array
+    {
+        return array_merge([
+            'title' => 'Sample task',
+            'developer' => 'Rahul',
+            'priority' => TaskPriority::Medium->value,
+            'status' => TaskStatus::Pending->value,
+            'description' => 'Do the work.',
+            'notes' => 'Internal note.',
+        ], $overrides);
+    }
+}
