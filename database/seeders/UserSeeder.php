@@ -9,6 +9,10 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        if (User::query()->exists()) {
+            return;
+        }
+
         User::query()->updateOrCreate(
             ['email' => config('pm.seed.email')],
             [

@@ -134,3 +134,65 @@ php artisan config:cache
 php artisan route:cache
 php artisan queue:work --sleep=1 --tries=3
 ```
+
+---
+
+## Coolify
+
+1. Create a MySQL database resource first.
+2. Create an application from this GitHub repo.
+3. Set **Build Pack** to `nixpacks`.
+4. Set **Ports Exposes** to `80`.
+5. Add environment variables (use the Coolify MySQL host, not `127.0.0.1`):
+
+```env
+APP_NAME="Personal PM"
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=
+APP_URL=https://your-domain.example
+APP_TIMEZONE=Asia/Kolkata
+
+DB_CONNECTION=mysql
+DB_HOST=
+DB_PORT=3306
+DB_DATABASE=pmtool
+DB_USERNAME=
+DB_PASSWORD=
+
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+
+MAIL_MAILER=smtp
+MAIL_HOST=
+MAIL_PORT=587
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=
+MAIL_FROM_NAME="Personal PM"
+
+SEED_USER_NAME=Ayan
+SEED_USER_EMAIL=ayan@example.com
+SEED_USER_PASSWORD=change-me
+```
+
+Generate `APP_KEY` locally with `php artisan key:generate --show` and paste it into Coolify. Do not leave it empty.
+
+On each deploy, Nixpacks/`start.sh` runs:
+
+```bash
+php artisan migrate --force
+php artisan storage:link
+php artisan db:seed --force   # only if no user exists yet
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan queue:work --sleep=1 --tries=3
+php artisan schedule:work
+```
+
+`schedule:work` keeps deadline reminders and the daily `db:backup` running.
+
+Optional: persist `/app/storage/app/backups` as a Coolify volume so the daily SQL dump survives redeploys.
