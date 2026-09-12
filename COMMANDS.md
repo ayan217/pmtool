@@ -180,19 +180,25 @@ SEED_USER_PASSWORD=change-me
 
 Generate `APP_KEY` locally with `php artisan key:generate --show` and paste it into Coolify. Do not leave it empty.
 
-On each deploy, Nixpacks/`start.sh` runs:
+Also set:
 
-```bash
-php artisan migrate --force
-php artisan storage:link
-php artisan db:seed --force   # only if no user exists yet
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-php artisan queue:work --sleep=1 --tries=3
-php artisan schedule:work
+```env
+NIXPACKS_PHP_ROOT_DIR=/app/public
+NIXPACKS_PHP_FALLBACK_PATH=/index.php
 ```
 
-`schedule:work` keeps deadline reminders and the daily `db:backup` running.
+In Coolify **Pre-deployment Command**:
+
+```bash
+php artisan migrate --force && php artisan db:seed --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan storage:link
+```
+
+`nixpacks.toml` matches the Coolify Laravel docs. Supervisor starts nginx, PHP-FPM, and `queue:work`.
+
+Add a Coolify cron job so reminders and the daily backup still run:
+
+```text
+* * * * * php artisan schedule:run
+```
 
 Optional: persist `/app/storage/app/backups` as a Coolify volume so the daily SQL dump survives redeploys.

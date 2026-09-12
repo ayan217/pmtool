@@ -1,12 +1,5 @@
-providers = ["php"]
-
-[variables]
-NIXPACKS_PHP_VERSION = "8.3"
-NIXPACKS_PHP_ROOT_DIR = "/app/public"
-NIXPACKS_PHP_FALLBACK_PATH = "/index.php"
-
 [phases.setup]
-nixPkgs = ["...", "python311Packages.supervisor", "mariadb"]
+nixPkgs = ["...", "python311Packages.supervisor"]
 
 [phases.build]
 cmds = [
@@ -14,33 +7,25 @@ cmds = [
     "cp /assets/worker-*.conf /etc/supervisor/conf.d/",
     "cp /assets/supervisord.conf /etc/supervisord.conf",
     "chmod +x /assets/start.sh",
+    "..."
 ]
 
 [start]
-cmd = "/assets/start.sh"
+cmd = '/assets/start.sh'
 
 [staticAssets]
 "start.sh" = '''
 #!/bin/bash
-set -e
 
-cd /app
-
-mkdir -p /app/storage/framework/{cache,sessions,views} /app/storage/logs /app/storage/app/backups /app/bootstrap/cache
+# Ensure storage and bootstrap cache are writable by www-data
 chown -R www-data:www-data /app/storage /app/bootstrap/cache
 chmod -R 775 /app/storage /app/bootstrap/cache
 
-php artisan migrate --force
-php artisan storage:link || true
-php artisan db:seed --force
-
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
+# Transform the nginx configuration
 node /assets/scripts/prestart.mjs /assets/nginx.template.conf /etc/nginx.conf
 
-exec supervisord -c /etc/supervisord.conf -n
+# Start supervisor
+supervisord -c /etc/supervisord.conf -n
 '''
 
 "supervisord.conf" = '''
@@ -88,34 +73,20 @@ stdout_logfile=/var/log/worker-phpfpm.log
 stderr_logfile=/var/log/worker-phpfpm.log
 '''
 
-"worker-queue.conf" = '''
-[program:worker-queue]
+"worker-laravel.conf" = '''
+[program:worker-laravel]
 process_name=%(program_name)s_%(process_num)02d
-command=bash -c 'exec php /app/artisan queue:work --sleep=1 --tries=3 --max-time=3600'
+command=bash -c 'exec php /app/artisan queue:work --sleep=3 --tries=3 --max-time=3600'
 user=www-data
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
-numprocs=1
+numprocs=12 # To reduce memory/CPU usage, change to 2.
 startsecs=0
 stopwaitsecs=3600
-stdout_logfile=/var/log/worker-queue.log
-stderr_logfile=/var/log/worker-queue.log
-'''
-
-"worker-scheduler.conf" = '''
-[program:worker-scheduler]
-process_name=%(program_name)s_%(process_num)02d
-command=bash -c 'exec php /app/artisan schedule:work'
-user=www-data
-autostart=true
-autorestart=true
-stopasgroup=true
-killasgroup=true
-numprocs=1
-stdout_logfile=/var/log/worker-scheduler.log
-stderr_logfile=/var/log/worker-scheduler.log
+stdout_logfile=/var/log/worker-laravel.log
+stderr_logfile=/var/log/worker-laravel.log
 '''
 
 "php-fpm.conf" = '''
@@ -126,25 +97,24 @@ group = www-data
 listen.owner = www-data
 listen.group = www-data
 pm = dynamic
-pm.max_children = 8
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
-pm.start_servers = 2
+pm.max_children = 50
+pm.min_spare_servers = 4
+pm.max_spare_servers = 32
+pm.start_servers = 18
 clear_env = no
 php_admin_value[post_max_size] = 35M
 php_admin_value[upload_max_filesize] = 30M
-php_admin_value[memory_limit] = 256M
 '''
 
 "nginx.template.conf" = '''
 user www-data www-data;
-worker_processes 2;
+worker_processes 5;
 daemon off;
 
 worker_rlimit_nofile 8192;
 
 events {
-    worker_connections 1024;
+  worker_connections  4096;  # Default: 1024
 }
 
 http {
@@ -159,7 +129,7 @@ http {
     error_log /var/log/nginx-error.log;
     sendfile     on;
     tcp_nopush   on;
-    server_names_hash_bucket_size 128;
+    server_names_hash_bucket_size 128; # this seems to be required for some vhosts
 
     server {
         listen ${PORT};
@@ -169,39 +139,42 @@ http {
         $if(NIXPACKS_PHP_ROOT_DIR) (
             root ${NIXPACKS_PHP_ROOT_DIR};
         ) else (
-            root /app/public;
+            root /app;
         )
 
         add_header X-Content-Type-Options "nosniff";
 
         client_max_body_size 35M;
+     
         index index.php;
+     
         charset utf-8;
+     
 
         $if(NIXPACKS_PHP_FALLBACK_PATH) (
             location / {
                 try_files $uri $uri/ ${NIXPACKS_PHP_FALLBACK_PATH}?$query_string;
             }
         ) else (
-            location / {
+          location / {
                 try_files $uri $uri/ /index.php?$query_string;
-            }
+           }
         )
-
+     
         location = /favicon.ico { access_log off; log_not_found off; }
         location = /robots.txt  { access_log off; log_not_found off; }
-
+     
         $if(IS_LARAVEL) (
             error_page 404 /index.php;
         ) else ()
-
+     
         location ~ \.php$ {
             fastcgi_pass 127.0.0.1:9000;
             fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
             include $!{nginx}/conf/fastcgi_params;
             include $!{nginx}/conf/fastcgi.conf;
         }
-
+     
         location ~ /\.(?!well-known).* {
             deny all;
         }
