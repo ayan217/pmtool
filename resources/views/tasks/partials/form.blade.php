@@ -63,31 +63,41 @@
                 }
             @endphp
 
+            @php
+                $developerCatalog = $developerCatalog ?? collect();
+            @endphp
+
             <div class="mt-4">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
                         <label class="form-label mb-0">Developers</label>
-                        <div class="small text-secondary">Add more than one. Email and phone are for later reminder emails and WhatsApp messages.</div>
+                        <div class="small text-secondary">Type a name to pick a saved developer. Email and phone fill in automatically. A new name is added to Developers.</div>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-dark" id="addDeveloperRow">+ Add Developer</button>
                 </div>
                 @error('developers') <div class="text-danger small mb-2">{{ $message }}</div> @enderror
+                <datalist id="developerCatalogList">
+                    @foreach ($developerCatalog as $catalogDeveloper)
+                        <option value="{{ $catalogDeveloper['name'] }}">{{ collect([$catalogDeveloper['email'] ?? null, $catalogDeveloper['phone'] ?? null])->filter()->implode(' · ') }}</option>
+                    @endforeach
+                </datalist>
+                <script type="application/json" id="developerCatalog">@json($developerCatalog->values())</script>
                 <div id="developerRows">
                     @foreach ($developerRows as $index => $developer)
                         <div class="developer-row row g-2 align-items-end mb-2">
                             <div class="col-md-4">
                                 <label class="form-label small mb-1">Name</label>
-                                <input type="text" name="developers[{{ $index }}][name]" value="{{ $developer['name'] ?? '' }}" class="form-control @error('developers.'.$index.'.name') is-invalid @enderror" maxlength="120" placeholder="Rahul">
+                                <input type="text" name="developers[{{ $index }}][name]" value="{{ $developer['name'] ?? '' }}" class="form-control @error('developers.'.$index.'.name') is-invalid @enderror" maxlength="120" placeholder="Rahul" list="developerCatalogList" autocomplete="off" data-developer-name>
                                 @error('developers.'.$index.'.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small mb-1">Email</label>
-                                <input type="email" name="developers[{{ $index }}][email]" value="{{ $developer['email'] ?? '' }}" class="form-control @error('developers.'.$index.'.email') is-invalid @enderror" maxlength="255" placeholder="rahul@example.com">
+                                <input type="email" name="developers[{{ $index }}][email]" value="{{ $developer['email'] ?? '' }}" class="form-control @error('developers.'.$index.'.email') is-invalid @enderror" maxlength="255" placeholder="rahul@example.com" data-developer-email>
                                 @error('developers.'.$index.'.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small mb-1">Phone</label>
-                                <input type="text" name="developers[{{ $index }}][phone]" value="{{ $developer['phone'] ?? '' }}" class="form-control @error('developers.'.$index.'.phone') is-invalid @enderror" maxlength="30" placeholder="+91 98765 43210">
+                                <input type="text" name="developers[{{ $index }}][phone]" value="{{ $developer['phone'] ?? '' }}" class="form-control @error('developers.'.$index.'.phone') is-invalid @enderror" maxlength="30" placeholder="+91 98765 43210" data-developer-phone>
                                 @error('developers.'.$index.'.phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-1">

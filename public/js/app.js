@@ -78,9 +78,62 @@
 
     const developerRows = document.getElementById('developerRows');
     const addDeveloperRow = document.getElementById('addDeveloperRow');
+    const developerCatalogEl = document.getElementById('developerCatalog');
+    let developerCatalog = [];
+
+    try {
+        developerCatalog = JSON.parse(developerCatalogEl?.textContent || '[]');
+    } catch (error) {
+        developerCatalog = [];
+    }
 
     function nextDeveloperIndex() {
         return developerRows?.querySelectorAll('.developer-row').length ?? 0;
+    }
+
+    function findCatalogDeveloper(name) {
+        const needle = String(name || '').trim().toLowerCase();
+
+        if (!needle) {
+            return null;
+        }
+
+        return developerCatalog.find((developer) => String(developer.name || '').trim().toLowerCase() === needle) || null;
+    }
+
+    function fillDeveloperRow(row, match) {
+        const emailInput = row.querySelector('[data-developer-email]');
+        const phoneInput = row.querySelector('[data-developer-phone]');
+
+        if (emailInput) {
+            emailInput.value = match.email || '';
+        }
+
+        if (phoneInput) {
+            phoneInput.value = match.phone || '';
+        }
+    }
+
+    function applyDeveloperSuggestion(row) {
+        const nameInput = row.querySelector('[data-developer-name]');
+
+        if (!nameInput) {
+            return;
+        }
+
+        const match = findCatalogDeveloper(nameInput.value);
+
+        if (!match) {
+            delete nameInput.dataset.filledName;
+            return;
+        }
+
+        if (nameInput.dataset.filledName === match.name) {
+            return;
+        }
+
+        fillDeveloperRow(row, match);
+        nameInput.dataset.filledName = match.name;
     }
 
     function developerRowMarkup(index) {
@@ -88,15 +141,15 @@
             <div class="developer-row row g-2 align-items-end mb-2">
                 <div class="col-md-4">
                     <label class="form-label small mb-1">Name</label>
-                    <input type="text" name="developers[${index}][name]" class="form-control" maxlength="120" placeholder="Rahul">
+                    <input type="text" name="developers[${index}][name]" class="form-control" maxlength="120" placeholder="Rahul" list="developerCatalogList" autocomplete="off" data-developer-name>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label small mb-1">Email</label>
-                    <input type="email" name="developers[${index}][email]" class="form-control" maxlength="255" placeholder="rahul@example.com">
+                    <input type="email" name="developers[${index}][email]" class="form-control" maxlength="255" placeholder="rahul@example.com" data-developer-email>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small mb-1">Phone</label>
-                    <input type="text" name="developers[${index}][phone]" class="form-control" maxlength="30" placeholder="+91 98765 43210">
+                    <input type="text" name="developers[${index}][phone]" class="form-control" maxlength="30" placeholder="+91 98765 43210" data-developer-phone>
                 </div>
                 <div class="col-md-1">
                     <button type="button" class="btn btn-outline-danger w-100" data-remove-developer aria-label="Remove developer">&times;</button>
@@ -123,11 +176,30 @@
         if (developerRows.querySelectorAll('.developer-row').length === 1) {
             row.querySelectorAll('input').forEach((input) => {
                 input.value = '';
+                delete input.dataset.filledName;
             });
             return;
         }
 
         row.remove();
+    });
+
+    developerRows?.addEventListener('input', (event) => {
+        const nameInput = event.target.closest('[data-developer-name]');
+        if (!nameInput) {
+            return;
+        }
+
+        applyDeveloperSuggestion(nameInput.closest('.developer-row'));
+    });
+
+    developerRows?.addEventListener('change', (event) => {
+        const nameInput = event.target.closest('[data-developer-name]');
+        if (!nameInput) {
+            return;
+        }
+
+        applyDeveloperSuggestion(nameInput.closest('.developer-row'));
     });
 
     if (commentForm && commentList) {

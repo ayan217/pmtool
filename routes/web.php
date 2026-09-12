@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TaskAttachmentController;
@@ -40,6 +41,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])->name('tasks.comments.store');
     Route::put('/tasks/{task}/comments/{comment}', [CommentController::class, 'update'])->name('tasks.comments.update');
     Route::delete('/tasks/{task}/comments/{comment}', [CommentController::class, 'destroy'])->name('tasks.comments.destroy');
+
+    Route::get('/developers', [DeveloperController::class, 'index'])->name('developers.index');
+    Route::get('/developers/create', [DeveloperController::class, 'create'])->name('developers.create');
+    Route::post('/developers', [DeveloperController::class, 'store'])->name('developers.store');
+    Route::get('/developers/{developer}/edit', [DeveloperController::class, 'edit'])->name('developers.edit');
+    Route::put('/developers/{developer}', [DeveloperController::class, 'update'])->name('developers.update');
+    Route::delete('/developers/{developer}', [DeveloperController::class, 'destroy'])->name('developers.destroy');
 
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');

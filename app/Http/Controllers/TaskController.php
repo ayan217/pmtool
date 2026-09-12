@@ -6,9 +6,9 @@ use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Models\Developer;
 use App\Models\Project;
 use App\Models\Task;
-use App\Models\TaskDeveloper;
 use App\Services\TaskQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,7 +35,7 @@ class TaskController extends Controller
         return view('tasks.index', [
             'tasks' => $tasks,
             'projects' => Project::query()->orderBy('name')->get(),
-            'developers' => $this->developerNames(),
+            'developers' => Developer::suggestionNames(),
             'filters' => $request->query(),
             'perPage' => $perPage,
         ]);
@@ -52,6 +52,7 @@ class TaskController extends Controller
                 'project_id' => request('project_id'),
             ]),
             'projects' => Project::query()->orderBy('name')->get(),
+            'developerCatalog' => Developer::catalog(),
         ]);
     }
 
@@ -96,6 +97,7 @@ class TaskController extends Controller
         return view('tasks.edit', [
             'task' => $task,
             'projects' => Project::query()->orderBy('name')->get(),
+            'developerCatalog' => Developer::catalog(),
         ]);
     }
 
@@ -181,16 +183,4 @@ class TaskController extends Controller
         return back()->with('success', 'Task restored.');
     }
 
-    /**
-     * @return \Illuminate\Support\Collection<int, string>
-     */
-    protected function developerNames()
-    {
-        return TaskDeveloper::query()
-            ->whereNotNull('name')
-            ->where('name', '!=', '')
-            ->distinct()
-            ->orderBy('name')
-            ->pluck('name');
-    }
 }

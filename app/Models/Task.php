@@ -112,6 +112,10 @@ class Task extends Model
             $this->developers()->createMany($rows->all());
         }
 
+        foreach ($rows as $row) {
+            Developer::upsertFromAssignment($row['name'], $row['email'], $row['phone']);
+        }
+
         $this->forceFill([
             'developer' => $rows->pluck('name')->filter()->implode(', ') ?: null,
         ])->save();

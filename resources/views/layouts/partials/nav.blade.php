@@ -8,6 +8,9 @@
     <a href="{{ route('projects.index') }}" class="{{ request()->routeIs('projects.*') ? 'active' : '' }}">
         <i class="bi bi-folder2"></i> Projects
     </a>
+    <a href="{{ route('developers.index') }}" class="{{ request()->routeIs('developers.*') ? 'active' : '' }}">
+        <i class="bi bi-people"></i> Developers
+    </a>
     <a href="{{ route('calendar.index') }}" class="{{ request()->routeIs('calendar.*') ? 'active' : '' }}">
         <i class="bi bi-calendar3"></i> Calendar
     </a>
