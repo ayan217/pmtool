@@ -33,7 +33,7 @@ class DashboardService
     public function overdueTasks(int $limit = 8): Collection
     {
         return Task::query()
-            ->with('project')
+            ->with(['project', 'developers'])
             ->overdue()
             ->orderByRaw('CASE
                 WHEN dev_deadline IS NULL THEN client_deadline
@@ -67,7 +67,7 @@ class DashboardService
     public function recentlyUpdated(int $limit = 8): Collection
     {
         return Task::query()
-            ->with('project')
+            ->with(['project', 'developers'])
             ->notArchived()
             ->orderByDesc('updated_at')
             ->limit($limit)
@@ -80,7 +80,7 @@ class DashboardService
     public function recentlyCompleted(int $limit = 8): Collection
     {
         return Task::query()
-            ->with('project')
+            ->with(['project', 'developers'])
             ->completed()
             ->orderByDesc('completed_at')
             ->limit($limit)
@@ -98,7 +98,7 @@ class DashboardService
             $column = $type === DeadlineType::Dev ? 'dev_deadline' : 'client_deadline';
 
             $tasks = Task::query()
-                ->with('project')
+                ->with(['project', 'developers'])
                 ->active()
                 ->whereNotNull($column)
                 ->when($from, fn ($query) => $query->where($column, '>=', $from))

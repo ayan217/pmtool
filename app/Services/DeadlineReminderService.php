@@ -50,7 +50,7 @@ class DeadlineReminderService
         $column = $type === DeadlineType::Dev ? 'dev_deadline' : 'client_deadline';
 
         $tasks = Task::query()
-            ->with('project')
+            ->with(['project', 'developers'])
             ->whereNotIn('status', [TaskStatus::Completed, TaskStatus::Archived])
             ->whereNull('archived_at')
             ->whereNull('completed_at')

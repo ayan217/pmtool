@@ -106,6 +106,42 @@ class TaskTest extends TestCase
         $this->assertNotNull($task->completed_at);
     }
 
+    public function test_multiple_developers_can_be_assigned(): void
+    {
+        $this->actingAs($this->user)->post('/tasks', $this->payload([
+            'title' => 'Shared API work',
+            'developers' => [
+                [
+                    'name' => 'Rahul',
+                    'email' => 'rahul@example.com',
+                    'phone' => '+919876543210',
+                ],
+                [
+                    'name' => 'Amit',
+                    'email' => 'amit@example.com',
+                    'phone' => '+918888888888',
+                ],
+            ],
+        ]))->assertRedirect();
+
+        $task = Task::query()->where('title', 'Shared API work')->first();
+
+        $this->assertNotNull($task);
+        $this->assertSame('Rahul, Amit', $task->developer);
+        $this->assertDatabaseHas('task_developers', [
+            'task_id' => $task->id,
+            'name' => 'Rahul',
+            'email' => 'rahul@example.com',
+            'phone' => '+919876543210',
+        ]);
+        $this->assertDatabaseHas('task_developers', [
+            'task_id' => $task->id,
+            'name' => 'Amit',
+            'email' => 'amit@example.com',
+            'phone' => '+918888888888',
+        ]);
+    }
+
     public function test_task_archiving_and_restore(): void
     {
         $task = Task::factory()->create(['status' => TaskStatus::InProgress]);

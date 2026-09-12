@@ -25,7 +25,11 @@ class UpdateTaskRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'project_id' => ['nullable', 'integer', Rule::exists('projects', 'id')],
-            'developer' => ['nullable', 'string', 'max:120'],
+            'developer' => ['nullable', 'string', 'max:255'],
+            'developers' => ['nullable', 'array', 'max:20'],
+            'developers.*.name' => ['required', 'string', 'max:120'],
+            'developers.*.email' => ['nullable', 'email', 'max:255'],
+            'developers.*.phone' => ['nullable', 'string', 'max:30'],
             'priority' => ['required', Rule::enum(TaskPriority::class)],
             'status' => ['required', Rule::enum(TaskStatus::class)],
             'description' => ['nullable', 'string', 'max:10000'],

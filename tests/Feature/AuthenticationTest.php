@@ -41,4 +41,40 @@ class AuthenticationTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_password_can_be_changed(): void
+    {
+        $user = User::factory()->create([
+            'password' => 'password',
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('settings.password'), [
+                'current_password' => 'password',
+                'password' => 'new-password',
+                'password_confirmation' => 'new-password',
+            ])
+            ->assertRedirect();
+
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('new-password', $user->fresh()->password));
+    }
+
+    public function test_password_change_requires_current_password(): void
+    {
+        $user = User::factory()->create([
+            'password' => 'password',
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('settings.edit'))
+            ->put(route('settings.password'), [
+                'current_password' => 'wrong-password',
+                'password' => 'new-password',
+                'password_confirmation' => 'new-password',
+            ])
+            ->assertRedirect(route('settings.edit'))
+            ->assertSessionHasErrors('current_password');
+
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('password', $user->fresh()->password));
+    }
 }

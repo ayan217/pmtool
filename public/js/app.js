@@ -76,6 +76,60 @@
         return data;
     }
 
+    const developerRows = document.getElementById('developerRows');
+    const addDeveloperRow = document.getElementById('addDeveloperRow');
+
+    function nextDeveloperIndex() {
+        return developerRows?.querySelectorAll('.developer-row').length ?? 0;
+    }
+
+    function developerRowMarkup(index) {
+        return `
+            <div class="developer-row row g-2 align-items-end mb-2">
+                <div class="col-md-4">
+                    <label class="form-label small mb-1">Name</label>
+                    <input type="text" name="developers[${index}][name]" class="form-control" maxlength="120" placeholder="Rahul">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small mb-1">Email</label>
+                    <input type="email" name="developers[${index}][email]" class="form-control" maxlength="255" placeholder="rahul@example.com">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Phone</label>
+                    <input type="text" name="developers[${index}][phone]" class="form-control" maxlength="30" placeholder="+91 98765 43210">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger w-100" data-remove-developer aria-label="Remove developer">&times;</button>
+                </div>
+            </div>
+        `;
+    }
+
+    addDeveloperRow?.addEventListener('click', () => {
+        developerRows?.insertAdjacentHTML('beforeend', developerRowMarkup(nextDeveloperIndex()));
+    });
+
+    developerRows?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-remove-developer]');
+        if (!button) {
+            return;
+        }
+
+        const row = button.closest('.developer-row');
+        if (!row) {
+            return;
+        }
+
+        if (developerRows.querySelectorAll('.developer-row').length === 1) {
+            row.querySelectorAll('input').forEach((input) => {
+                input.value = '';
+            });
+            return;
+        }
+
+        row.remove();
+    });
+
     if (commentForm && commentList) {
         commentForm.addEventListener('submit', async (event) => {
             event.preventDefault();

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskDeveloper;
 use App\Services\TaskQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class TaskController extends Controller
         return view('tasks.index', [
             'tasks' => $tasks,
             'projects' => Project::query()->orderBy('name')->get(),
-            'developers' => Task::query()->whereNotNull('developer')->where('developer', '!=', '')->distinct()->orderBy('developer')->pluck('developer'),
+            'developers' => $this->developerNames(),
             'filters' => $request->query(),
             'perPage' => $perPage,
         ]);
@@ -61,7 +62,6 @@ class TaskController extends Controller
         $task = Task::query()->create($request->safe()->only([
             'title',
             'project_id',
-            'developer',
             'priority',
             'status',
             'description',
@@ -69,6 +69,8 @@ class TaskController extends Controller
             'dev_deadline',
             'client_deadline',
         ]));
+
+        $task->syncDevelopers($request->validated('developers') ?? []);
 
         return redirect()
             ->route('tasks.show', $task)
@@ -79,7 +81,7 @@ class TaskController extends Controller
     {
         $this->authorize('view', $task);
 
-        $task->load(['project', 'comments.user']);
+        $task->load(['project', 'comments.user', 'developers']);
 
         return view('tasks.show', compact('task'));
     }
@@ -87,6 +89,8 @@ class TaskController extends Controller
     public function edit(Task $task): View
     {
         $this->authorize('update', $task);
+
+        $task->load('developers');
 
         return view('tasks.edit', [
             'task' => $task,
@@ -101,7 +105,6 @@ class TaskController extends Controller
         $data = $request->safe()->only([
             'title',
             'project_id',
-            'developer',
             'priority',
             'status',
             'description',
@@ -131,6 +134,7 @@ class TaskController extends Controller
         }
 
         $task->update($data);
+        $task->syncDevelopers($request->validated('developers') ?? []);
 
         return redirect()
             ->route('tasks.show', $task)
@@ -173,5 +177,18 @@ class TaskController extends Controller
         $task->restore();
 
         return back()->with('success', 'Task restored.');
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, string>
+     */
+    protected function developerNames()
+    {
+        return TaskDeveloper::query()
+            ->whereNotNull('name')
+            ->where('name', '!=', '')
+            ->distinct()
+            ->orderBy('name')
+            ->pluck('name');
     }
 }

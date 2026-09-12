@@ -34,8 +34,6 @@ class UpdateSettingsRequest extends FormRequest
             'notify_client_deadlines' => ['required', 'boolean'],
             'reminder_hours_dev' => ['required', 'integer', Rule::in($hours)],
             'reminder_hours_client' => ['required', 'integer', Rule::in($hours)],
-            'current_password' => ['nullable', 'required_with:password', 'current_password'],
-            'password' => ['nullable', 'confirmed', 'min:8'],
         ];
     }
 }

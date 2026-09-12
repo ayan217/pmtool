@@ -30,11 +30,6 @@
                     @error('project_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label" for="developer">Developer</label>
-                    <input id="developer" name="developer" value="{{ old('developer', $task->developer) }}" class="form-control @error('developer') is-invalid @enderror" maxlength="120">
-                    @error('developer') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                </div>
-                <div class="col-md-2">
                     <label class="form-label" for="priority">Priority</label>
                     <select id="priority" name="priority" class="form-select @error('priority') is-invalid @enderror">
                         @foreach (\App\Enums\TaskPriority::cases() as $priority)
@@ -42,13 +37,64 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <label class="form-label" for="status">Status</label>
                     <select id="status" name="status" class="form-select @error('status') is-invalid @enderror">
                         @foreach ($statusOptions as $status)
                             <option value="{{ $status->value }}" @selected(old('status', $task->status?->value) === $status->value)>{{ $status->label() }}</option>
                         @endforeach
                     </select>
+                </div>
+            </div>
+
+            @php
+                $developerRows = old('developers');
+                if (! is_array($developerRows)) {
+                    $developerRows = $task->relationLoaded('developers') || $task->exists
+                        ? $task->developers->map(fn ($developer) => [
+                            'name' => $developer->name,
+                            'email' => $developer->email,
+                            'phone' => $developer->phone,
+                        ])->all()
+                        : [];
+                }
+                if ($developerRows === []) {
+                    $developerRows = [['name' => '', 'email' => '', 'phone' => '']];
+                }
+            @endphp
+
+            <div class="mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <label class="form-label mb-0">Developers</label>
+                        <div class="small text-secondary">Add more than one. Email and phone are for later reminder emails and WhatsApp messages.</div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-dark" id="addDeveloperRow">+ Add Developer</button>
+                </div>
+                @error('developers') <div class="text-danger small mb-2">{{ $message }}</div> @enderror
+                <div id="developerRows">
+                    @foreach ($developerRows as $index => $developer)
+                        <div class="developer-row row g-2 align-items-end mb-2">
+                            <div class="col-md-4">
+                                <label class="form-label small mb-1">Name</label>
+                                <input type="text" name="developers[{{ $index }}][name]" value="{{ $developer['name'] ?? '' }}" class="form-control @error('developers.'.$index.'.name') is-invalid @enderror" maxlength="120" placeholder="Rahul">
+                                @error('developers.'.$index.'.name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small mb-1">Email</label>
+                                <input type="email" name="developers[{{ $index }}][email]" value="{{ $developer['email'] ?? '' }}" class="form-control @error('developers.'.$index.'.email') is-invalid @enderror" maxlength="255" placeholder="rahul@example.com">
+                                @error('developers.'.$index.'.email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small mb-1">Phone</label>
+                                <input type="text" name="developers[{{ $index }}][phone]" value="{{ $developer['phone'] ?? '' }}" class="form-control @error('developers.'.$index.'.phone') is-invalid @enderror" maxlength="30" placeholder="+91 98765 43210">
+                                @error('developers.'.$index.'.phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-outline-danger w-100" data-remove-developer aria-label="Remove developer">&times;</button>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 

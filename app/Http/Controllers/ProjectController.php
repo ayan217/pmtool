@@ -53,7 +53,7 @@ class ProjectController extends Controller
         $filters = array_merge($request->all(), ['project' => $project->id]);
 
         $tasks = $taskQuery
-            ->apply($project->tasks()->getQuery()->with('project'), $filters, 'all')
+            ->apply($project->tasks()->getQuery()->with(['project', 'developers']), $filters, 'all')
             ->orderByDesc('updated_at')
             ->get();
 

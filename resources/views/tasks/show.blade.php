@@ -37,9 +37,24 @@
                     <div class="text-secondary small">Project</div>
                     <div>{{ $task->project?->name ?? 'No project' }}</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="text-secondary small">Developer</div>
-                    <div>{{ $task->developer ?: 'Unassigned' }}</div>
+                <div class="col-md-6">
+                    <div class="text-secondary small">Developers</div>
+                    @if ($task->developers->isEmpty())
+                        <div>Unassigned</div>
+                    @else
+                        <div class="d-flex flex-column gap-2 mt-1">
+                            @foreach ($task->developers as $developer)
+                                <div>
+                                    <div class="fw-semibold">{{ $developer->name }}</div>
+                                    <div class="small text-secondary">
+                                        {{ $developer->email ?: 'No email' }}
+                                        ·
+                                        {{ $developer->phone ?: 'No phone' }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
                 <div class="col-md-3">
                     <div class="text-secondary small">Status</div>

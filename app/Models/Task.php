@@ -62,6 +62,47 @@ class Task extends Model
         return $this->hasMany(TaskComment::class)->latest();
     }
 
+    public function developers(): HasMany
+    {
+        return $this->hasMany(TaskDeveloper::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $developers
+     */
+    public function syncDevelopers(array $developers): void
+    {
+        $this->developers()->delete();
+
+        $rows = collect($developers)
+            ->map(function (array $developer, int $index): ?array {
+                $name = trim((string) ($developer['name'] ?? ''));
+                $email = trim((string) ($developer['email'] ?? ''));
+                $phone = trim((string) ($developer['phone'] ?? ''));
+
+                if ($name === '' && $email === '' && $phone === '') {
+                    return null;
+                }
+
+                return [
+                    'name' => $name !== '' ? $name : 'Developer',
+                    'email' => $email !== '' ? $email : null,
+                    'phone' => $phone !== '' ? $phone : null,
+                    'sort_order' => $index,
+                ];
+            })
+            ->filter()
+            ->values();
+
+        if ($rows->isNotEmpty()) {
+            $this->developers()->createMany($rows->all());
+        }
+
+        $this->forceFill([
+            'developer' => $rows->pluck('name')->filter()->implode(', ') ?: null,
+        ])->save();
+    }
+
     public function deadlineNotifications(): HasMany
     {
         return $this->hasMany(DeadlineNotification::class);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskDeveloper;
 use App\Services\TaskQuery;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -29,7 +30,7 @@ class ArchiveController extends Controller
         return view('archive.index', [
             'tasks' => $tasks,
             'projects' => Project::query()->orderBy('name')->get(),
-            'developers' => Task::query()->whereNotNull('developer')->where('developer', '!=', '')->distinct()->orderBy('developer')->pluck('developer'),
+            'developers' => TaskDeveloper::query()->whereNotNull('name')->where('name', '!=', '')->distinct()->orderBy('name')->pluck('name'),
             'filters' => $request->query(),
             'perPage' => $perPage,
         ]);

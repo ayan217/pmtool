@@ -21,7 +21,7 @@ class CalendarController extends Controller
         $end = $request->date('end')?->endOfDay();
 
         $tasks = Task::query()
-            ->with('project')
+            ->with(['project', 'developers'])
             ->notArchived()
             ->where(function ($query) use ($start, $end) {
                 $query->where(function ($inner) use ($start, $end) {

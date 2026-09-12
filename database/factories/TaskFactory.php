@@ -6,6 +6,7 @@ use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskDeveloper;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -50,5 +51,20 @@ class TaskFactory extends Factory
             'previous_status' => TaskStatus::Pending,
             'archived_at' => now(),
         ]);
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Task $task) {
+            if (! filled($task->developer) || $task->developers()->exists()) {
+                return;
+            }
+
+            TaskDeveloper::query()->create([
+                'task_id' => $task->id,
+                'name' => $task->developer,
+                'sort_order' => 0,
+            ]);
+        });
     }
 }

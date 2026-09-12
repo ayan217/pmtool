@@ -18,8 +18,16 @@
     </p>
 
     <p>
-        <strong>Developer:</strong><br>
-        {{ $task->developer ?: 'Unassigned' }}
+        <strong>Developers:</strong><br>
+        @forelse ($task->developers as $developer)
+            {{ $developer->name }}
+            @if ($developer->email || $developer->phone)
+                ({{ collect([$developer->email, $developer->phone])->filter()->implode(', ') }})
+            @endif
+            <br>
+        @empty
+            {{ $task->developer ?: 'Unassigned' }}
+        @endforelse
     </p>
 
     <p>

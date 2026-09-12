@@ -13,7 +13,7 @@ class TaskQuery
 {
     public function fromRequest(Request $request, ?string $defaultView = 'active'): Builder
     {
-        return $this->apply(Task::query()->with('project'), $request->all(), $defaultView);
+        return $this->apply(Task::query()->with(['project', 'developers']), $request->all(), $defaultView);
     }
 
     /**
@@ -112,7 +112,18 @@ class TaskQuery
             return;
         }
 
-        $query->where('developer', 'like', '%'.$this->escapeLike($value).'%');
+        $like = '%'.$this->escapeLike($value).'%';
+
+        $query->where(function (Builder $builder) use ($like) {
+            $builder
+                ->where('developer', 'like', $like)
+                ->orWhereHas('developers', function (Builder $developers) use ($like) {
+                    $developers
+                        ->where('name', 'like', $like)
+                        ->orWhere('email', 'like', $like)
+                        ->orWhere('phone', 'like', $like);
+                });
+        });
     }
 
     protected function applyStatus(Builder $query, mixed $status, ?string $quick): void
@@ -229,6 +240,12 @@ class TaskQuery
                 ->orWhere('description', 'like', $like)
                 ->orWhere('notes', 'like', $like)
                 ->orWhere('developer', 'like', $like)
+                ->orWhereHas('developers', function (Builder $developers) use ($like) {
+                    $developers
+                        ->where('name', 'like', $like)
+                        ->orWhere('email', 'like', $like)
+                        ->orWhere('phone', 'like', $like);
+                })
                 ->orWhereHas('project', fn (Builder $project) => $project->where('name', 'like', $like))
                 ->orWhereHas('comments', fn (Builder $comments) => $comments->where('comment', 'like', $like));
         });
