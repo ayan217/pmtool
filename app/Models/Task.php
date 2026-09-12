@@ -151,6 +151,19 @@ class Task extends Model
         });
     }
 
+    public function scopeOrderBySubmission(Builder $query): Builder
+    {
+        return $query
+            ->orderByRaw('CASE WHEN dev_deadline IS NULL AND client_deadline IS NULL THEN 1 ELSE 0 END')
+            ->orderByRaw('CASE
+                WHEN dev_deadline IS NULL THEN client_deadline
+                WHEN client_deadline IS NULL THEN dev_deadline
+                WHEN dev_deadline < client_deadline THEN dev_deadline
+                ELSE client_deadline
+            END ASC')
+            ->orderBy('updated_at');
+    }
+
     public function isCompleted(): bool
     {
         return $this->status === TaskStatus::Completed;

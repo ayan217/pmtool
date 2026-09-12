@@ -106,6 +106,37 @@ class TaskTest extends TestCase
         $this->assertNotNull($task->completed_at);
     }
 
+    public function test_tasks_are_ordered_by_nearest_submission(): void
+    {
+        Task::factory()->create([
+            'title' => 'No deadline',
+            'dev_deadline' => null,
+            'client_deadline' => null,
+        ]);
+        Task::factory()->create([
+            'title' => 'Later deadline',
+            'dev_deadline' => now()->addDays(5),
+        ]);
+        Task::factory()->create([
+            'title' => 'Soon deadline',
+            'client_deadline' => now()->addHours(6),
+        ]);
+        Task::factory()->create([
+            'title' => 'Overdue deadline',
+            'dev_deadline' => now()->subDay(),
+        ]);
+
+        $this->actingAs($this->user)
+            ->get('/tasks')
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Overdue deadline',
+                'Soon deadline',
+                'Later deadline',
+                'No deadline',
+            ]);
+    }
+
     public function test_multiple_developers_can_be_assigned(): void
     {
         $this->actingAs($this->user)->post('/tasks', $this->payload([

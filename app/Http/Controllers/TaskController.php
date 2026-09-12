@@ -28,7 +28,7 @@ class TaskController extends Controller
 
         $tasks = $taskQuery
             ->fromRequest($request)
-            ->orderByDesc('updated_at')
+            ->orderBySubmission()
             ->paginate($perPage)
             ->withQueryString();
 
