@@ -71,6 +71,7 @@ class TaskController extends Controller
         ]));
 
         $task->syncDevelopers($request->validated('developers') ?? []);
+        $task->storeAttachments($request->file('attachments', []));
 
         return redirect()
             ->route('tasks.show', $task)
@@ -81,7 +82,7 @@ class TaskController extends Controller
     {
         $this->authorize('view', $task);
 
-        $task->load(['project', 'comments.user', 'developers']);
+        $task->load(['project', 'comments.user', 'developers', 'attachments']);
 
         return view('tasks.show', compact('task'));
     }
@@ -90,7 +91,7 @@ class TaskController extends Controller
     {
         $this->authorize('update', $task);
 
-        $task->load('developers');
+        $task->load(['developers', 'attachments']);
 
         return view('tasks.edit', [
             'task' => $task,
@@ -135,6 +136,7 @@ class TaskController extends Controller
 
         $task->update($data);
         $task->syncDevelopers($request->validated('developers') ?? []);
+        $task->storeAttachments($request->file('attachments', []));
 
         return redirect()
             ->route('tasks.show', $task)

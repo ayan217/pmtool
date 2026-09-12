@@ -90,6 +90,27 @@
         </div>
     </div>
 
+    <div class="card pm-card mb-4">
+        <div class="card-body">
+            <h2 class="h6 text-uppercase text-secondary mb-3">Documents</h2>
+
+            @if ($task->attachments->isEmpty())
+                <p class="text-secondary">No documents attached yet.</p>
+            @else
+                @include('tasks.partials.attachment-list', ['task' => $task])
+            @endif
+
+            <form method="POST" action="{{ route('tasks.attachments.store', $task) }}" enctype="multipart/form-data" class="mt-3">
+                @csrf
+                <label class="form-label" for="attachments">Add documents</label>
+                <input id="attachments" type="file" name="attachments[]" class="form-control @error('attachments') is-invalid @enderror @error('attachments.0') is-invalid @enderror" multiple>
+                @error('attachments') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                @error('attachments.*') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                <button class="btn btn-dark mt-3" type="submit">Attach</button>
+            </form>
+        </div>
+    </div>
+
     <div class="card pm-card">
         <div class="card-body">
             <h2 class="h6 text-uppercase text-secondary mb-3">Comments</h2>

@@ -4,7 +4,7 @@
         : \App\Enums\TaskStatus::activeCases();
 @endphp
 
-<form method="POST" action="{{ $action }}" class="needs-validation" novalidate>
+<form method="POST" action="{{ $action }}" class="needs-validation" enctype="multipart/form-data" novalidate>
     @csrf
     @if ($method ?? false)
         @method($method)
@@ -108,6 +108,19 @@
                 <label class="form-label" for="notes">Notes</label>
                 <textarea id="notes" name="notes" rows="4" class="form-control @error('notes') is-invalid @enderror">{{ old('notes', $task->notes) }}</textarea>
                 @error('notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+
+            <div class="mt-4">
+                <label class="form-label" for="attachments">Documents</label>
+                <div class="small text-secondary mb-2">Attach one or more files. Max {{ config('pm.attachments.max_files') }} files, {{ number_format(config('pm.attachments.max_kilobytes') / 1024) }} MB each.</div>
+                @if ($task->exists && $task->attachments->isNotEmpty())
+                    <div class="border rounded-3 px-3 mb-3">
+                        @include('tasks.partials.attachment-list', ['task' => $task])
+                    </div>
+                @endif
+                <input id="attachments" type="file" name="attachments[]" class="form-control @error('attachments') is-invalid @enderror @error('attachments.0') is-invalid @enderror" multiple>
+                @error('attachments') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                @error('attachments.*') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
             </div>
 
             <div class="row g-3 mt-1">

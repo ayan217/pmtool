@@ -23,6 +23,8 @@ class TaskQuery
     {
         $quick = $this->stringValue($filters['quick'] ?? null);
 
+        $query->withCount('attachments');
+
         $this->applyDefaultView($query, $filters, $defaultView, $quick);
         $this->applyQuickFilter($query, $quick);
         $this->applyProject($query, $filters['project'] ?? null);
@@ -247,7 +249,8 @@ class TaskQuery
                         ->orWhere('phone', 'like', $like);
                 })
                 ->orWhereHas('project', fn (Builder $project) => $project->where('name', 'like', $like))
-                ->orWhereHas('comments', fn (Builder $comments) => $comments->where('comment', 'like', $like));
+                ->orWhereHas('comments', fn (Builder $comments) => $comments->where('comment', 'like', $like))
+                ->orWhereHas('attachments', fn (Builder $attachments) => $attachments->where('original_name', 'like', $like));
         });
     }
 

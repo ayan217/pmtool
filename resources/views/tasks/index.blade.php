@@ -32,7 +32,6 @@
                                 <th>Status</th>
                                 <th>Dev Deadline</th>
                                 <th>Client Deadline</th>
-                                <th>Updated</th>
                                 <th></th>
                             </tr>
                         </thead>

@@ -16,4 +16,11 @@ return [
         'relative_path' => env('DB_BACKUP_PATH', 'app/backups/daily.sql'),
         'dump_binary' => env('DB_DUMP_BINARY'),
     ],
+
+    'attachments' => [
+        'disk' => env('FILESYSTEM_DISK', 'local'),
+        'max_files' => 20,
+        'max_kilobytes' => 25600,
+        'blocked_extensions' => ['php', 'phtml', 'phar', 'exe', 'bat', 'cmd', 'sh', 'ps1', 'cgi', 'htaccess'],
+    ],
 ];

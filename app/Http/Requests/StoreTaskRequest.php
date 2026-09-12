@@ -5,12 +5,14 @@ namespace App\Http\Requests;
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Http\Requests\Concerns\CombinesDeadlineFields;
+use App\Http\Requests\Concerns\ValidatesTaskAttachments;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreTaskRequest extends FormRequest
 {
     use CombinesDeadlineFields;
+    use ValidatesTaskAttachments;
 
     public function authorize(): bool
     {
@@ -44,6 +46,7 @@ class StoreTaskRequest extends FormRequest
             'client_deadline_time' => ['nullable', 'date_format:H:i'],
             'dev_deadline' => ['nullable', 'date'],
             'client_deadline' => ['nullable', 'date'],
+            ...$this->attachmentRules(),
         ];
     }
 }

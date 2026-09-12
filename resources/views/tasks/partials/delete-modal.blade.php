@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="mb-0">This will permanently delete <strong>{{ $task->title }}</strong> and its comments. This cannot be undone.</p>
+                <p class="mb-0">This will permanently delete <strong>{{ $task->title }}</strong>, its comments, and attached documents. This cannot be undone.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>

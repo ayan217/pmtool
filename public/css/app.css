@@ -145,6 +145,10 @@ body.app-body {
     padding: 3rem 1rem;
 }
 
+.attachment-list a {
+    word-break: break-word;
+}
+
 .comment-item {
     position: relative;
     padding-left: 1.4rem;

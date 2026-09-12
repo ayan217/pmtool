@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class Task extends Model
 {
@@ -52,6 +54,13 @@ class Task extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Task $task): void {
+            $task->attachments()->get()->each->delete();
+        });
+    }
+
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
@@ -65,6 +74,11 @@ class Task extends Model
     public function developers(): HasMany
     {
         return $this->hasMany(TaskDeveloper::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TaskAttachment::class)->orderBy('sort_order')->orderBy('id');
     }
 
     /**
@@ -101,6 +115,39 @@ class Task extends Model
         $this->forceFill([
             'developer' => $rows->pluck('name')->filter()->implode(', ') ?: null,
         ])->save();
+    }
+
+    /**
+     * @param  iterable<int, mixed>  $files
+     */
+    public function storeAttachments(iterable $files): void
+    {
+        $sort = (int) $this->attachments()->max('sort_order');
+        $disk = (string) config('pm.attachments.disk', 'local');
+
+        foreach ($files as $file) {
+            if (! $file instanceof UploadedFile || ! $file->isValid()) {
+                continue;
+            }
+
+            $sort++;
+            $extension = strtolower($file->getClientOriginalExtension());
+            $filename = Str::uuid()->toString().($extension !== '' ? '.'.$extension : '');
+            $path = $file->storeAs('tasks/'.$this->id, $filename, $disk);
+
+            if ($path === false) {
+                continue;
+            }
+
+            $this->attachments()->create([
+                'original_name' => $file->getClientOriginalName() ?: $filename,
+                'disk' => $disk,
+                'path' => $path,
+                'mime_type' => $file->getClientMimeType() ?: $file->getMimeType(),
+                'size' => $file->getSize(),
+                'sort_order' => $sort,
+            ]);
+        }
     }
 
     public function deadlineNotifications(): HasMany
