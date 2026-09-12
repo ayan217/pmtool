@@ -201,4 +201,18 @@ Add a Coolify cron job so reminders and the daily backup still run:
 * * * * * php artisan schedule:run
 ```
 
-Optional: persist `/app/storage/app/backups` as a Coolify volume so the daily SQL dump survives redeploys.
+**Required:** add a Coolify persistent volume so task attachments and the daily backup survive redeploys.
+
+In the application → **Persistent Storage**, the destination path must be:
+
+| Field | Value |
+|---|---|
+| Destination path | `/app/storage/app` |
+
+Do not use `/storage/app/public`. That path is outside the app (`/app`) and points at Laravel's public disk. This app stores documents in `/app/storage/app/private`, so that volume never sees the files.
+
+If you already have `/storage/app/public`, edit it to `/app/storage/app`, then redeploy.
+
+Without this volume, every redeploy wipes uploaded documents and the SQL dump. Database rows stay, so downloads then 404.
+
+Files uploaded before this volume existed cannot be recovered. Re-upload those documents after the volume is attached and the app is redeployed.

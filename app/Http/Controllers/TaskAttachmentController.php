@@ -20,11 +20,15 @@ class TaskAttachmentController extends Controller
         return back()->with('success', 'Documents attached.');
     }
 
-    public function download(Task $task, TaskAttachment $attachment): StreamedResponse
+    public function download(Task $task, TaskAttachment $attachment): StreamedResponse|RedirectResponse
     {
         abort_unless($attachment->task_id === $task->id, 404);
 
         $this->authorize('view', $task);
+
+        if (! $attachment->existsOnDisk()) {
+            return back()->with('error', 'This file is no longer on the server. Re-upload it after Coolify persistent storage is attached.');
+        }
 
         return $attachment->download();
     }

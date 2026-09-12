@@ -5,8 +5,13 @@
                 <div class="d-flex align-items-center gap-2 min-w-0">
                     <i class="bi {{ $attachment->icon() }}"></i>
                     <div class="min-w-0">
-                        <a href="{{ route('tasks.attachments.download', [$task, $attachment]) }}" class="task-link text-break">{{ $attachment->original_name }}</a>
-                        <div class="small text-secondary">{{ $attachment->humanSize() }}</div>
+                        @if ($attachment->existsOnDisk())
+                            <a href="{{ route('tasks.attachments.download', [$task, $attachment]) }}" class="task-link text-break">{{ $attachment->original_name }}</a>
+                            <div class="small text-secondary">{{ $attachment->humanSize() }}</div>
+                        @else
+                            <div class="task-link text-break">{{ $attachment->original_name }}</div>
+                            <div class="small text-danger">File missing after deploy. Re-upload this document.</div>
+                        @endif
                     </div>
                 </div>
                 @unless ($readOnly ?? false)

@@ -82,6 +82,22 @@ class TaskAttachmentTest extends TestCase
             ->assertDownload('invoice.pdf');
     }
 
+    public function test_missing_document_files_redirect_instead_of_downloading(): void
+    {
+        $task = Task::factory()->create();
+        $task->storeAttachments([
+            UploadedFile::fake()->create('lost.pdf', 10, 'application/pdf'),
+        ]);
+        $attachment = $task->attachments()->first();
+        Storage::disk('local')->delete($attachment->path);
+
+        $this->actingAs($this->user)
+            ->from(route('tasks.show', $task))
+            ->get(route('tasks.attachments.download', [$task, $attachment]))
+            ->assertRedirect(route('tasks.show', $task))
+            ->assertSessionHas('error');
+    }
+
     public function test_guests_cannot_download_documents(): void
     {
         $task = Task::factory()->create();
