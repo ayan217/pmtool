@@ -4,7 +4,7 @@
         : \App\Enums\TaskStatus::activeCases();
 @endphp
 
-<form method="POST" action="{{ $action }}" class="needs-validation" enctype="multipart/form-data" novalidate>
+<form id="taskForm" method="POST" action="{{ $action }}" class="needs-validation" enctype="multipart/form-data" novalidate>
     @csrf
     @if ($method ?? false)
         @method($method)
@@ -154,7 +154,7 @@
 
             <div class="d-flex justify-content-end gap-2 mt-4">
                 <a href="{{ $cancelUrl }}" class="btn btn-outline-secondary">Cancel</a>
-                <button class="btn btn-dark" type="submit">{{ $submitLabel }}</button>
+                <button class="btn btn-dark" type="submit" form="taskForm">{{ $submitLabel }}</button>
             </div>
         </div>
     </div>

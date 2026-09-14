@@ -69,6 +69,41 @@ class TaskAttachmentTest extends TestCase
         ]);
     }
 
+    public function test_updating_a_task_with_documents_does_not_delete_it(): void
+    {
+        $task = Task::factory()->create(['title' => 'Keep this task']);
+        $task->storeAttachments([
+            UploadedFile::fake()->create('brief.pdf', 20, 'application/pdf'),
+        ]);
+        $attachment = $task->attachments()->first();
+
+        $html = $this->actingAs($this->user)
+            ->get(route('tasks.edit', $task))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('id="taskForm"', $html);
+        $this->assertStringContainsString('form="delete-attachment-'.$attachment->id.'"', $html);
+        $this->assertSame(1, preg_match('/<form[^>]*id="taskForm".*?<\/form>/s', $html, $match));
+        $this->assertStringNotContainsString('DELETE', $match[0]);
+
+        $this->actingAs($this->user)
+            ->put(route('tasks.update', $task), [
+                'title' => 'Still here',
+                'priority' => TaskPriority::Medium->value,
+                'status' => TaskStatus::Pending->value,
+                'description' => 'Updated with a document already attached.',
+            ])
+            ->assertRedirect(route('tasks.show', $task))
+            ->assertSessionHas('success', 'Task updated successfully.');
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task->id,
+            'title' => 'Still here',
+        ]);
+        $this->assertDatabaseCount('task_attachments', 1);
+    }
+
     public function test_an_attached_document_can_be_downloaded(): void
     {
         $task = Task::factory()->create();

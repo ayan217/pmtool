@@ -36,6 +36,7 @@
         <main class="app-main">
             {{ $slot ?? '' }}
             @yield('content')
+            @stack('forms')
         </main>
     </div>
 </div>

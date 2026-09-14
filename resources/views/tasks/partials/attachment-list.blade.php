@@ -15,11 +15,13 @@
                     </div>
                 </div>
                 @unless ($readOnly ?? false)
-                    <form method="POST" action="{{ route('tasks.attachments.destroy', [$task, $attachment]) }}" data-confirm-form="Remove this document?">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-                    </form>
+                    <button type="submit" class="btn btn-sm btn-outline-danger" form="delete-attachment-{{ $attachment->id }}">Remove</button>
+                    @push('forms')
+                        <form id="delete-attachment-{{ $attachment->id }}" method="POST" action="{{ route('tasks.attachments.destroy', [$task, $attachment]) }}" data-confirm-form="Remove this document?">
+                            @csrf
+                            @method('DELETE')
+                        </form>
+                    @endpush
                 @endunless
             </li>
         @endforeach
