@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EmailLogType;
 use App\Http\Requests\SendTaskReminderRequest;
 use App\Mail\StatusReminderMail;
 use App\Models\Task;
+use App\Services\EmailLogService;
 use App\Services\StatusReminderTemplateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 
 class TaskReminderController extends Controller
 {
-    public function store(SendTaskReminderRequest $request, Task $task, StatusReminderTemplateService $templates): RedirectResponse
-    {
+    public function store(
+        SendTaskReminderRequest $request,
+        Task $task,
+        StatusReminderTemplateService $templates,
+        EmailLogService $emailLogs,
+    ): RedirectResponse {
         $this->authorize('remind', $task);
 
         $channel = $request->validated('channel');
@@ -34,6 +40,15 @@ class TaskReminderController extends Controller
             $message['subject'],
             $message['body'],
         ));
+
+        $emailLogs->record(
+            EmailLogType::StatusReminder,
+            $emails,
+            $message['subject'],
+            $message['body'],
+            $task,
+            $request->user(),
+        );
 
         return back()->with('success', 'Email reminder queued for '.implode(', ', $emails).'.');
     }

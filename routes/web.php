@@ -6,6 +6,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeveloperController;
+use App\Http\Controllers\EmailReportController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SettingsController;
@@ -69,6 +70,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/email-template', [EmailTemplateController::class, 'edit'])->name('email-templates.edit');
     Route::put('/email-template', [EmailTemplateController::class, 'update'])->name('email-templates.update');
+
+    Route::get('/email-report', [EmailReportController::class, 'index'])->name('email-report.index');
+    Route::get('/email-report/{emailLog}', [EmailReportController::class, 'show'])->name('email-report.show');
 
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');

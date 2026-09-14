@@ -77,6 +77,7 @@ class DeadlineReminderTest extends TestCase
 
         Mail::assertQueued(DeadlineReminderMail::class, 1);
         $this->assertSame(1, DeadlineNotification::query()->count());
+        $this->assertSame(1, \App\Models\EmailLog::query()->count());
     }
 
     public function test_command_sends_due_reminders(): void

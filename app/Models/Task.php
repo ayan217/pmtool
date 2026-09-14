@@ -159,6 +159,11 @@ class Task extends Model
         return $this->hasMany(DeadlineNotification::class);
     }
 
+    public function emailLogs(): HasMany
+    {
+        return $this->hasMany(EmailLog::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query

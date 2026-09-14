@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DeadlineType;
+use App\Enums\EmailLogType;
 use App\Enums\TaskStatus;
 use App\Mail\DeadlineReminderMail;
 use App\Models\DeadlineNotification;
@@ -14,7 +15,10 @@ use Illuminate\Support\Facades\Mail;
 
 class DeadlineReminderService
 {
-    public function __construct(protected SettingsService $settings) {}
+    public function __construct(
+        protected SettingsService $settings,
+        protected EmailLogService $emailLogs,
+    ) {}
 
     /**
      * @return array{sent: int, skipped: int}
@@ -116,6 +120,16 @@ class DeadlineReminderService
         Mail::to($user->email)->queue(new DeadlineReminderMail($task, $type, $deadline));
 
         $notification->update(['sent_at' => now()]);
+
+        $this->emailLogs->record(
+            EmailLogType::DeadlineReminder,
+            [$user->email],
+            'Deadline approaching: '.$task->title,
+            $this->emailLogs->deadlineBody($task, $type, $deadline),
+            $task,
+            $user,
+            $type,
+        );
 
         return true;
     }

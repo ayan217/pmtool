@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Mail\StatusReminderMail;
+use App\Models\EmailLog;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\StatusReminderTemplateService;
@@ -71,6 +72,13 @@ class StatusReminderTest extends TestCase
                 && str_contains($mail->bodyText, '5 hours')
                 && $mail->hasTo('rahul@example.com');
         });
+
+        $this->assertDatabaseHas('email_logs', [
+            'type' => 'status_reminder',
+            'task_id' => $task->id,
+            'subject' => 'API handover',
+        ]);
+        $this->assertSame(['rahul@example.com'], EmailLog::query()->first()->recipients);
     }
 
     public function test_email_reminder_requires_a_developer_email(): void
@@ -88,6 +96,7 @@ class StatusReminderTest extends TestCase
             ->assertSessionHas('error');
 
         Mail::assertNothingQueued();
+        $this->assertDatabaseCount('email_logs', 0);
     }
 
     public function test_whatsapp_reminder_is_not_sent_yet(): void
@@ -110,5 +119,6 @@ class StatusReminderTest extends TestCase
             ->assertSessionHas('error');
 
         Mail::assertNothingQueued();
+        $this->assertDatabaseCount('email_logs', 0);
     }
 }
