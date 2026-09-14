@@ -110,4 +110,12 @@ class TaskFilterTest extends TestCase
             ->assertSee('Clear filters')
             ->assertSee('href="'.e(route('tasks.index')).'"', false);
     }
+
+    public function test_task_pages_are_not_cached_by_the_browser(): void
+    {
+        $response = $this->actingAs($this->user)->get('/tasks');
+
+        $response->assertOk();
+        $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
+    }
 }

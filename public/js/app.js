@@ -16,6 +16,12 @@
 
     window.pmShowToast = showToast;
 
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
     document.querySelectorAll('[data-confirm-form]').forEach((form) => {
         form.addEventListener('submit', (event) => {
             const message = form.getAttribute('data-confirm-form');
