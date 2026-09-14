@@ -4,6 +4,8 @@
 
 @section('content')
 
+    <x-back-button :fallback="route('tasks.show', $task)" />
+
     <div class="mb-4">
         <p class="page-kicker mb-1">Update work</p>
         <h1 class="page-title h3 mb-0">Edit Task</h1>

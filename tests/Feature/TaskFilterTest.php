@@ -99,4 +99,15 @@ class TaskFilterTest extends TestCase
             ->assertSee('Urgent fix')
             ->assertDontSee('Low polish');
     }
+
+    public function test_filters_include_a_clear_option(): void
+    {
+        $this->actingAs($this->user)
+            ->get('/tasks?status=blocked')
+            ->assertOk()
+            ->assertSee('Filters')
+            ->assertSee('Apply filters')
+            ->assertSee('Clear filters')
+            ->assertSee('href="'.e(route('tasks.index')).'"', false);
+    }
 }

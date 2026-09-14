@@ -4,6 +4,8 @@
 
 @section('content')
 
+    <x-back-button :fallback="route('developers.index')" />
+
     <div class="mb-4">
         <p class="page-kicker mb-1">People directory</p>
         <h1 class="page-title h3 mb-0">Edit {{ $developer->name }}</h1>

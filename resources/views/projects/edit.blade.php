@@ -4,6 +4,8 @@
 
 @section('content')
 
+    <x-back-button :fallback="route('projects.show', $project)" />
+
     <div class="mb-4">
         <p class="page-kicker mb-1">Update project</p>
         <h1 class="page-title h3 mb-0">Edit Project</h1>

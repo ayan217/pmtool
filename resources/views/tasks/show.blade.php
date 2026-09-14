@@ -4,6 +4,8 @@
 
 @section('content')
 
+    <x-back-button :fallback="route('tasks.index')" />
+
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
         <div>
             <p class="page-kicker mb-1">{{ $task->project?->name ?? 'Standalone task' }}</p>

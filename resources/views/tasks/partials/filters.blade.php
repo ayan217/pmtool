@@ -15,6 +15,14 @@
 
 <form method="GET" action="{{ $action }}" class="card pm-card mb-4">
     <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 class="h6 mb-0">Filters</h2>
+            <div class="d-flex gap-2">
+                <a href="{{ $action }}" class="btn btn-sm btn-outline-secondary">Clear filters</a>
+                <button class="btn btn-sm btn-dark" type="submit">Apply filters</button>
+            </div>
+        </div>
+
         <div class="quick-filters d-flex flex-wrap gap-2 mb-3">
             @foreach ($quickFilters as $value => $label)
                 <a href="{{ request()->fullUrlWithQuery(['quick' => $value, 'page' => null]) }}"
@@ -23,6 +31,10 @@
                 </a>
             @endforeach
         </div>
+
+        @if (filled($quick) && $quick !== 'all')
+            <input type="hidden" name="quick" value="{{ $quick }}">
+        @endif
 
         <div class="row g-3">
             <div class="col-md-4">
@@ -107,9 +119,6 @@
                         <option value="{{ $option }}" @selected((int) $perPage === (int) $option)>{{ $option }}</option>
                     @endforeach
                 </select>
-            </div>
-            <div class="col-md-2 d-flex align-items-end gap-2">
-                <button class="btn btn-dark w-100" type="submit">Filter</button>
             </div>
         </div>
     </div>

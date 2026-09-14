@@ -126,6 +126,29 @@ class TaskTest extends TestCase
         $this->assertNotNull($task->completed_at);
     }
 
+    public function test_task_and_edit_pages_have_a_back_button(): void
+    {
+        $task = Task::factory()->create();
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.show', $task))
+            ->assertOk()
+            ->assertSee('data-pm-back', false)
+            ->assertSee('Back');
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.edit', $task))
+            ->assertOk()
+            ->assertSee('data-pm-back', false);
+
+        $project = Project::factory()->create();
+
+        $this->actingAs($this->user)
+            ->get(route('projects.show', $project))
+            ->assertOk()
+            ->assertSee('data-pm-back', false);
+    }
+
     public function test_tasks_are_ordered_by_nearest_submission(): void
     {
         Task::factory()->create([

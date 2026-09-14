@@ -265,4 +265,25 @@
             }
         });
     }
+
+    document.querySelectorAll('[data-pm-back]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const fallback = button.getAttribute('data-fallback') || '/';
+            let sameOriginReferrer = false;
+
+            try {
+                sameOriginReferrer = document.referrer !== ''
+                    && new URL(document.referrer).origin === window.location.origin;
+            } catch (error) {
+                sameOriginReferrer = false;
+            }
+
+            if (sameOriginReferrer && window.history.length > 1) {
+                window.history.back();
+                return;
+            }
+
+            window.location.href = fallback;
+        });
+    });
 })();
