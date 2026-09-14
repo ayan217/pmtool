@@ -67,7 +67,7 @@ trait CombinesDeadlineFields
             return null;
         }
 
-        $time = $this->blankToNull($this->input($timeField)) ?? '00:00';
+        $time = $this->blankToNull($this->input($timeField)) ?? (string) config('pm.default_deadline_time', '23:59');
 
         try {
             return Carbon::parse($date.' '.$time)->format('Y-m-d H:i:s');

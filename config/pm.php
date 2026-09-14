@@ -5,6 +5,7 @@ return [
     'default_reminder_hours' => 3,
     'per_page_options' => [25, 50, 100],
     'default_per_page' => 25,
+    'default_deadline_time' => '23:59',
 
     'seed' => [
         'name' => env('SEED_USER_NAME', 'Ayan'),

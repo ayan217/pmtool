@@ -72,6 +72,26 @@ class TaskTest extends TestCase
         ]);
     }
 
+    public function test_deadline_time_defaults_to_end_of_day(): void
+    {
+        $this->actingAs($this->user)
+            ->get(route('tasks.create'))
+            ->assertOk()
+            ->assertSee('value="23:59"', false);
+
+        $this->actingAs($this->user)->post('/tasks', $this->payload([
+            'title' => 'Date only deadline',
+            'dev_deadline_date' => '2026-09-20',
+            'client_deadline_date' => '2026-09-21',
+        ]))->assertRedirect();
+
+        $task = Task::query()->where('title', 'Date only deadline')->first();
+
+        $this->assertNotNull($task);
+        $this->assertSame('2026-09-20 23:59:00', $task->dev_deadline?->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-09-21 23:59:00', $task->client_deadline?->format('Y-m-d H:i:s'));
+    }
+
     public function test_task_update(): void
     {
         $task = Task::factory()->create(['title' => 'Old title']);

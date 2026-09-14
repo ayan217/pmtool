@@ -133,6 +133,9 @@
                 @error('attachments.*') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
             </div>
 
+            @php
+                $defaultDeadlineTime = config('pm.default_deadline_time', '23:59');
+            @endphp
             <div class="row g-3 mt-1">
                 <div class="col-md-3">
                     <label class="form-label" for="dev_deadline_date">Dev Deadline Date</label>
@@ -140,7 +143,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label" for="dev_deadline_time">Dev Deadline Time</label>
-                    <input id="dev_deadline_time" type="time" name="dev_deadline_time" class="form-control" value="{{ old('dev_deadline_time', $task->dev_deadline?->format('H:i')) }}">
+                    <input id="dev_deadline_time" type="time" name="dev_deadline_time" class="form-control" value="{{ old('dev_deadline_time', $task->dev_deadline?->format('H:i') ?? $defaultDeadlineTime) }}">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label" for="client_deadline_date">Client Deadline Date</label>
@@ -148,7 +151,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label" for="client_deadline_time">Client Deadline Time</label>
-                    <input id="client_deadline_time" type="time" name="client_deadline_time" class="form-control" value="{{ old('client_deadline_time', $task->client_deadline?->format('H:i')) }}">
+                    <input id="client_deadline_time" type="time" name="client_deadline_time" class="form-control" value="{{ old('client_deadline_time', $task->client_deadline?->format('H:i') ?? $defaultDeadlineTime) }}">
                 </div>
             </div>
 
