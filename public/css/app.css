@@ -149,6 +149,24 @@ body.app-body {
     word-break: break-word;
 }
 
+.modal {
+    white-space: normal;
+}
+
+.modal-content {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.modal-title,
+.modal-body,
+.modal-body p,
+.modal-body strong {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
 .comment-item {
     position: relative;
     padding-left: 1.4rem;

@@ -254,6 +254,44 @@ class Task extends Model
         return $type === DeadlineType::Dev ? $this->dev_deadline : $this->client_deadline;
     }
 
+    public function remainingHoursLabel(): string
+    {
+        $upcoming = collect([$this->dev_deadline, $this->client_deadline])
+            ->filter(fn ($deadline) => $deadline instanceof Carbon && $deadline->gt(now()))
+            ->sort()
+            ->first();
+
+        if ($upcoming === null) {
+            return collect([$this->dev_deadline, $this->client_deadline])->filter()->isNotEmpty()
+                ? 'overdue'
+                : 'no deadline';
+        }
+
+        $minutes = (int) round(abs(now()->diffInMinutes($upcoming)));
+
+        if ($minutes < 60) {
+            return 'less than 1 hour';
+        }
+
+        $hours = (int) max(1, round($minutes / 60));
+
+        return $hours.' '.Str::plural('hour', $hours);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function developerEmails(): array
+    {
+        return $this->developers
+            ->pluck('email')
+            ->map(fn ($email) => is_string($email) ? trim($email) : '')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     public function complete(): void
     {
         $this->update([

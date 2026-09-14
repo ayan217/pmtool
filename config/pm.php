@@ -23,4 +23,9 @@ return [
         'max_kilobytes' => 25600,
         'blocked_extensions' => ['php', 'phtml', 'phar', 'exe', 'bat', 'cmd', 'sh', 'ps1', 'cgi', 'htaccess'],
     ],
+
+    'status_reminder' => [
+        'subject' => '{task.title}',
+        'body' => "hi team,\n\nplease share the status of this task, the deadline is in {remaining.hours}, if any delay is happening please contact me personally over call or whatsapp.\n\n{task.des}",
+    ],
 ];

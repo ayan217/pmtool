@@ -11,6 +11,12 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a href="{{ route('tasks.edit', $task) }}" class="btn btn-outline-secondary">Edit</a>
+            @unless ($task->isArchived())
+                <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#remindTask{{ $task->id }}">Send Reminder</button>
+                @push('forms')
+                    @include('tasks.partials.reminder-modal')
+                @endpush
+            @endunless
             @if (! $task->isCompleted() && ! $task->isArchived())
                 <form method="POST" action="{{ route('tasks.complete', $task) }}">
                     @csrf

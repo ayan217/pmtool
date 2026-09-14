@@ -193,13 +193,14 @@ In Coolify **Pre-deployment Command**:
 php artisan migrate --force && php artisan db:seed --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan storage:link
 ```
 
-`nixpacks.toml` matches the Coolify Laravel docs. Supervisor starts nginx, PHP-FPM, and `queue:work`.
+`nixpacks.toml` matches the Coolify Laravel docs and starts Supervisor on every container boot. After each redeploy, Supervisor starts:
 
-Add a Coolify cron job so reminders and the daily backup still run:
+- nginx
+- PHP-FPM
+- `queue:work` (sends queued reminder emails)
+- `schedule:work` (runs `deadlines:send-reminders` every 15 minutes and the daily backup)
 
-```text
-* * * * * php artisan schedule:run
-```
+Do not also add a Coolify Scheduled Task / cron for `php artisan schedule:run`. That would run the scheduler twice. The in-container `schedule:work` process is enough.
 
 **Required:** add a Coolify persistent volume so task attachments and the daily backup survive redeploys.
 

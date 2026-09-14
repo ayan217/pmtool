@@ -129,4 +129,4 @@ Tests use an in-memory SQLite database.
 - Serve `public/` from Nginx or Apache
 - Run `php artisan migrate --force` on deploy
 - Run `php artisan config:cache` and `php artisan route:cache`
-- Keep `queue:work` and `schedule:run` running as described above
+- Keep `queue:work` and the scheduler running. On Coolify, `nixpacks.toml` starts both through Supervisor on every redeploy.

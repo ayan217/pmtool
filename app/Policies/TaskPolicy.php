@@ -41,4 +41,9 @@ class TaskPolicy
     {
         return true;
     }
+
+    public function remind(User $user, Task $task): bool
+    {
+        return true;
+    }
 }

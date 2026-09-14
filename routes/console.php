@@ -2,5 +2,10 @@
 
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::command('deadlines:send-reminders')->everyFifteenMinutes();
-Schedule::command('db:backup')->dailyAt('02:00');
+Schedule::command('deadlines:send-reminders')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping();
+
+Schedule::command('db:backup')
+    ->dailyAt('02:00')
+    ->withoutOverlapping();

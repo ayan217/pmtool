@@ -36,4 +36,14 @@ class TaskDeadlineTest extends TestCase
         $this->assertFalse($task->isDevOverdue());
         $this->assertFalse($task->isClientOverdue());
     }
+
+    public function test_remaining_hours_label_uses_the_soonest_deadline(): void
+    {
+        $task = Task::factory()->create([
+            'dev_deadline' => now()->addHours(5),
+            'client_deadline' => now()->addHours(12),
+        ]);
+
+        $this->assertSame('5 hours', $task->remainingHoursLabel());
+    }
 }

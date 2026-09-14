@@ -88,6 +88,7 @@ stderr_logfile=/var/log/worker-phpfpm.log
 [program:worker-laravel]
 process_name=%(program_name)s_%(process_num)02d
 command=bash -c 'exec php /app/artisan queue:work --sleep=3 --tries=3 --max-time=3600'
+directory=/app
 user=www-data
 autostart=true
 autorestart=true
@@ -98,6 +99,22 @@ startsecs=0
 stopwaitsecs=3600
 stdout_logfile=/var/log/worker-laravel.log
 stderr_logfile=/var/log/worker-laravel.log
+'''
+
+"worker-scheduler.conf" = '''
+[program:worker-scheduler]
+process_name=%(program_name)s
+command=bash -c 'exec php /app/artisan schedule:work --no-interaction'
+directory=/app
+user=www-data
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+numprocs=1
+startsecs=1
+stdout_logfile=/var/log/worker-scheduler.log
+stderr_logfile=/var/log/worker-scheduler.log
 '''
 
 "php-fpm.conf" = '''

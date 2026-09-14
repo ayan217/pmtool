@@ -17,6 +17,9 @@
     <a href="{{ route('archive.index') }}" class="{{ request()->routeIs('archive.*') ? 'active' : '' }}">
         <i class="bi bi-archive"></i> Archive
     </a>
+    <a href="{{ route('email-templates.edit') }}" class="{{ request()->routeIs('email-templates.*') ? 'active' : '' }}">
+        <i class="bi bi-envelope"></i> Email Template
+    </a>
     <a href="{{ route('settings.edit') }}" class="{{ request()->routeIs('settings.*') ? 'active' : '' }}">
         <i class="bi bi-gear"></i> Settings
     </a>

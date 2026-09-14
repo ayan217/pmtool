@@ -6,10 +6,12 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeveloperController;
+use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TaskAttachmentController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskReminderController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -33,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
     Route::post('/tasks/{task}/archive', [TaskController::class, 'archive'])->name('tasks.archive');
     Route::post('/tasks/{task}/restore', [TaskController::class, 'restore'])->name('tasks.restore');
+    Route::post('/tasks/{task}/reminders', [TaskReminderController::class, 'store'])->name('tasks.reminders.store');
 
     Route::post('/tasks/{task}/attachments', [TaskAttachmentController::class, 'store'])->name('tasks.attachments.store');
     Route::get('/tasks/{task}/attachments/{attachment}', [TaskAttachmentController::class, 'download'])->name('tasks.attachments.download');
@@ -63,6 +66,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 
     Route::get('/archive', ArchiveController::class)->name('archive.index');
+
+    Route::get('/email-template', [EmailTemplateController::class, 'edit'])->name('email-templates.edit');
+    Route::put('/email-template', [EmailTemplateController::class, 'update'])->name('email-templates.update');
 
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
