@@ -65,16 +65,16 @@ Configure Laravel Mail in `.env`. Do not hardcode credentials in the repository.
 
 ```env
 MAIL_MAILER=smtp
-MAIL_HOST=
+MAIL_SCHEME=smtp
+MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=
+MAIL_USERNAME=you@gmail.com
 MAIL_PASSWORD=
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS="you@example.com"
+MAIL_FROM_ADDRESS="you@gmail.com"
 MAIL_FROM_NAME="Personal PM"
 ```
 
-For local development you can use `MAIL_MAILER=log` to write emails to `storage/logs`.
+Use a Gmail App Password, not the account login password. `MAIL_USERNAME` and `MAIL_FROM_ADDRESS` should be the same Gmail or Google Workspace address. For local development you can use `MAIL_MAILER=log` to write emails to `storage/logs`.
 
 ## Queues
 
