@@ -46,4 +46,25 @@ class TaskDeadlineTest extends TestCase
 
         $this->assertSame('5 hours', $task->remainingHoursLabel());
     }
+
+    public function test_completed_tasks_are_ordered_after_open_work(): void
+    {
+        $openLater = Task::factory()->create([
+            'title' => 'Open later',
+            'dev_deadline' => now()->addDays(5),
+        ]);
+        $completedSoon = Task::factory()->completed()->create([
+            'title' => 'Completed soon',
+            'dev_deadline' => now()->subDay(),
+        ]);
+        $openSoon = Task::factory()->create([
+            'title' => 'Open soon',
+            'dev_deadline' => now()->subHours(2),
+        ]);
+
+        $this->assertSame(
+            [$openSoon->id, $openLater->id, $completedSoon->id],
+            Task::query()->orderBySubmission()->pluck('id')->all(),
+        );
+    }
 }

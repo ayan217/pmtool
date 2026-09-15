@@ -180,6 +180,32 @@ class TaskTest extends TestCase
             ]);
     }
 
+    public function test_completed_tasks_sort_after_open_work_regardless_of_deadline(): void
+    {
+        Task::factory()->create([
+            'title' => 'Open later',
+            'dev_deadline' => now()->addDays(5),
+        ]);
+        Task::factory()->completed()->create([
+            'title' => 'Completed overdue',
+            'dev_deadline' => now()->subDay(),
+            'completed_at' => now(),
+        ]);
+        Task::factory()->create([
+            'title' => 'Open overdue',
+            'dev_deadline' => now()->subHours(2),
+        ]);
+
+        $this->actingAs($this->user)
+            ->get('/tasks?quick=all')
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Open overdue',
+                'Open later',
+                'Completed overdue',
+            ]);
+    }
+
     public function test_multiple_developers_can_be_assigned(): void
     {
         $this->actingAs($this->user)->post('/tasks', $this->payload([

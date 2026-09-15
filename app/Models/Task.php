@@ -210,6 +210,7 @@ class Task extends Model
     public function scopeOrderBySubmission(Builder $query): Builder
     {
         return $query
+            ->orderByRaw('CASE WHEN status = ? THEN 1 ELSE 0 END', [TaskStatus::Completed->value])
             ->orderByRaw('CASE WHEN dev_deadline IS NULL AND client_deadline IS NULL THEN 1 ELSE 0 END')
             ->orderByRaw('CASE
                 WHEN dev_deadline IS NULL THEN client_deadline

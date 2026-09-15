@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ProjectStatus;
+use App\Enums\TaskStatus;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
@@ -54,6 +55,7 @@ class ProjectController extends Controller
 
         $tasks = $taskQuery
             ->apply($project->tasks()->getQuery()->with(['project', 'developers']), $filters, 'all')
+            ->orderByRaw('CASE WHEN status = ? THEN 1 ELSE 0 END', [TaskStatus::Completed->value])
             ->orderByDesc('updated_at')
             ->get();
 
