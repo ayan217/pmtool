@@ -2,15 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
 use App\Mail\StatusReminderMail;
 use App\Models\EmailLog;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\StatusReminderTemplateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StatusReminderTest extends TestCase
@@ -23,6 +24,7 @@ class StatusReminderTest extends TestCase
     {
         parent::setUp();
 
+        Storage::fake('local');
         Mail::fake();
         $this->user = User::factory()->create();
     }
@@ -79,6 +81,73 @@ class StatusReminderTest extends TestCase
             'subject' => 'API handover',
         ]);
         $this->assertSame(['rahul@example.com'], EmailLog::query()->first()->recipients);
+    }
+
+    public function test_email_reminder_attaches_task_documents(): void
+    {
+        $task = Task::factory()->create(['title' => 'Handover pack']);
+        $task->syncDevelopers([
+            [
+                'name' => 'Rahul',
+                'email' => 'rahul@example.com',
+                'phone' => null,
+            ],
+        ]);
+        $task->storeAttachments([
+            UploadedFile::fake()->create('brief.pdf', 40, 'application/pdf'),
+            UploadedFile::fake()->create('notes.txt', 10, 'text/plain'),
+        ]);
+
+        $this->actingAs($this->user)
+            ->post(route('tasks.reminders.store', $task), [
+                'channel' => 'email',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $files = $task->fresh()->attachments;
+
+        Mail::assertQueued(StatusReminderMail::class, function (StatusReminderMail $mail) use ($files) {
+            return $files->every(fn ($file) => $mail->hasAttachment(
+                Attachment::fromStorageDisk($file->disk, $file->path)
+                    ->as($file->original_name)
+                    ->withMime($file->mime_type),
+            ));
+        });
+    }
+
+    public function test_email_reminder_skips_documents_that_are_missing_from_disk(): void
+    {
+        $task = Task::factory()->create();
+        $task->syncDevelopers([
+            [
+                'name' => 'Rahul',
+                'email' => 'rahul@example.com',
+                'phone' => null,
+            ],
+        ]);
+        $task->storeAttachments([
+            UploadedFile::fake()->create('brief.pdf', 40, 'application/pdf'),
+        ]);
+
+        $missing = $task->attachments()->first();
+        Storage::disk('local')->delete($missing->path);
+
+        $this->actingAs($this->user)
+            ->post(route('tasks.reminders.store', $task), [
+                'channel' => 'email',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        Mail::assertQueued(StatusReminderMail::class, function (StatusReminderMail $mail) use ($missing) {
+            return $mail->attachments() === []
+                && ! $mail->hasAttachment(
+                    Attachment::fromStorageDisk($missing->disk, $missing->path)
+                        ->as($missing->original_name)
+                        ->withMime($missing->mime_type),
+                );
+        });
     }
 
     public function test_email_reminder_requires_a_developer_email(): void

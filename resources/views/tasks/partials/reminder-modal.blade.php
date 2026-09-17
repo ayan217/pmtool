@@ -11,6 +11,9 @@
                     <p class="small text-danger mb-0">This task has no developer email. Add one on the task or in Developers first.</p>
                 @else
                     <p class="small text-secondary mb-0">Email will go to {{ implode(', ', $task->developerEmails()) }}.</p>
+                    @if (($task->attachments_count ?? $task->attachments->count()) > 0)
+                        <p class="small text-secondary mb-0 mt-2">Task documents will be attached to the email.</p>
+                    @endif
                 @endif
             </div>
             <div class="modal-footer flex-wrap gap-2">

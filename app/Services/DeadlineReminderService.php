@@ -17,6 +17,7 @@ class DeadlineReminderService
 {
     public function __construct(
         protected SettingsService $settings,
+        protected EmailSettingsService $emailSettings,
         protected EmailLogService $emailLogs,
     ) {}
 
@@ -54,7 +55,7 @@ class DeadlineReminderService
         $column = $type === DeadlineType::Dev ? 'dev_deadline' : 'client_deadline';
 
         $tasks = Task::query()
-            ->with(['project', 'developers'])
+            ->with(['project', 'developers', 'attachments'])
             ->whereNotIn('status', [TaskStatus::Completed, TaskStatus::Archived])
             ->whereNull('archived_at')
             ->whereNull('completed_at')
@@ -117,13 +118,20 @@ class DeadlineReminderService
             return false;
         }
 
-        Mail::to($user->email)->queue(new DeadlineReminderMail($task, $type, $deadline));
+        $adminEmail = $this->emailSettings->adminEmail($user);
+
+        Mail::to($adminEmail)->queue(new DeadlineReminderMail(
+            $task,
+            $type,
+            $deadline,
+            $this->emailSettings->fromName($user),
+        ));
 
         $notification->update(['sent_at' => now()]);
 
         $this->emailLogs->record(
             EmailLogType::DeadlineReminder,
-            [$user->email],
+            [$adminEmail],
             'Deadline approaching: '.$task->title,
             $this->emailLogs->deadlineBody($task, $type, $deadline),
             $task,

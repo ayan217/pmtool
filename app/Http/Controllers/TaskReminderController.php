@@ -7,6 +7,7 @@ use App\Http\Requests\SendTaskReminderRequest;
 use App\Mail\StatusReminderMail;
 use App\Models\Task;
 use App\Services\EmailLogService;
+use App\Services\EmailSettingsService;
 use App\Services\StatusReminderTemplateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
@@ -17,6 +18,7 @@ class TaskReminderController extends Controller
         SendTaskReminderRequest $request,
         Task $task,
         StatusReminderTemplateService $templates,
+        EmailSettingsService $emailSettings,
         EmailLogService $emailLogs,
     ): RedirectResponse {
         $this->authorize('remind', $task);
@@ -36,9 +38,10 @@ class TaskReminderController extends Controller
         $message = $templates->render($request->user(), $task);
 
         Mail::to($emails)->queue(new StatusReminderMail(
-            $task->loadMissing(['project', 'developers']),
+            $task->loadMissing(['project', 'developers', 'attachments']),
             $message['subject'],
             $message['body'],
+            $emailSettings->fromName($request->user()),
         ));
 
         $emailLogs->record(

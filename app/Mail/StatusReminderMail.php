@@ -2,6 +2,8 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\AttachesTaskDocuments;
+use App\Mail\Concerns\UsesConfiguredFromName;
 use App\Models\Task;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,19 +14,20 @@ use Illuminate\Queue\SerializesModels;
 
 class StatusReminderMail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use AttachesTaskDocuments, Queueable, SerializesModels, UsesConfiguredFromName;
 
     public function __construct(
         public Task $task,
         public string $subjectLine,
         public string $bodyText,
-    ) {}
+        ?string $fromName = null,
+    ) {
+        $this->fromName = $fromName;
+    }
 
     public function envelope(): Envelope
     {
-        return new Envelope(
-            subject: $this->subjectLine,
-        );
+        return $this->envelopeWithSubject($this->subjectLine);
     }
 
     public function content(): Content
