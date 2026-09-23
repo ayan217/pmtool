@@ -272,6 +272,14 @@
         });
     }
 
+    document.querySelectorAll('[data-pm-open-on-load]').forEach((element) => {
+        if (!window.bootstrap?.Modal) {
+            return;
+        }
+
+        window.bootstrap.Modal.getOrCreateInstance(element).show();
+    });
+
     document.querySelectorAll('[data-pm-back]').forEach((button) => {
         button.addEventListener('click', () => {
             const fallback = button.getAttribute('data-fallback') || '/';

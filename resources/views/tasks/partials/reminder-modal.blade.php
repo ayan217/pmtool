@@ -1,12 +1,18 @@
-<div class="modal fade" id="remindTask{{ $task->id }}" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="remindTask{{ $task->id }}" tabindex="-1" aria-hidden="true" @if ($askOnLoad ?? false) data-pm-open-on-load @endif>
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title h5">Send reminder</h2>
+                <h2 class="modal-title h5">{{ ($askOnLoad ?? false) ? 'Send a reminder now?' : 'Send reminder' }}</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="mb-3">Send a status reminder for <strong>{{ $task->title }}</strong>.</p>
+                <p class="mb-3">
+                    @if ($askOnLoad ?? false)
+                        This task was just created. Send a status reminder for <strong>{{ $task->title }}</strong>?
+                    @else
+                        Send a status reminder for <strong>{{ $task->title }}</strong>.
+                    @endif
+                </p>
                 @if ($task->developerEmails() === [])
                     <p class="small text-danger mb-0">This task has no developer email. Add one on the task or in Developers first.</p>
                 @else
@@ -22,8 +28,12 @@
                     <input type="hidden" name="channel" value="email">
                     <button class="btn btn-dark" type="submit" @disabled($task->developerEmails() === [])>Email reminder</button>
                 </form>
-                <button class="btn btn-outline-secondary" type="button" disabled>WhatsApp reminder</button>
-                <button class="btn btn-outline-secondary" type="button" disabled>Both</button>
+                @if ($askOnLoad ?? false)
+                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Not now</button>
+                @else
+                    <button class="btn btn-outline-secondary" type="button" disabled>WhatsApp reminder</button>
+                    <button class="btn btn-outline-secondary" type="button" disabled>Both</button>
+                @endif
             </div>
         </div>
     </div>

@@ -16,7 +16,7 @@
             @unless ($task->isArchived())
                 <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal" data-bs-target="#remindTask{{ $task->id }}">Send Reminder</button>
                 @push('forms')
-                    @include('tasks.partials.reminder-modal')
+                    @include('tasks.partials.reminder-modal', ['askOnLoad' => session('ask_reminder')])
                 @endpush
             @endunless
             @if (! $task->isCompleted() && ! $task->isArchived())

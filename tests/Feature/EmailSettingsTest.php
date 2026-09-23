@@ -44,8 +44,10 @@ class EmailSettingsTest extends TestCase
             ->assertSee('Email Settings')
             ->assertSee('From name')
             ->assertSee('Admin email address')
+            ->assertSee('Daily reminder time')
             ->assertSee('value="Ayan"', false)
-            ->assertSee('value="login@example.com"', false);
+            ->assertSee('value="login@example.com"', false)
+            ->assertSee('value="18:00"', false);
     }
 
     public function test_email_settings_can_be_saved_independently_of_login_email(): void
@@ -54,6 +56,7 @@ class EmailSettingsTest extends TestCase
             ->put(route('email-settings.update'), [
                 'from_name' => 'Personal PM',
                 'admin_email' => 'reports@example.com',
+                'daily_reminder_time' => '19:30',
             ])
             ->assertRedirect()
             ->assertSessionHas('success');
@@ -62,6 +65,7 @@ class EmailSettingsTest extends TestCase
 
         $this->assertSame('Personal PM', $settings['from_name']);
         $this->assertSame('reports@example.com', $settings['admin_email']);
+        $this->assertSame('19:30', $settings['daily_reminder_time']);
         $this->assertSame('login@example.com', $this->user->fresh()->email);
     }
 
@@ -126,6 +130,7 @@ class EmailSettingsTest extends TestCase
             ->put(route('email-settings.update'), [
                 'from_name' => 'Personal PM',
                 'admin_email' => 'not-an-email',
+                'daily_reminder_time' => '18:00',
             ])
             ->assertRedirect(route('email-settings.edit'))
             ->assertSessionHasErrors('admin_email');

@@ -3,6 +3,7 @@
 return [
     'reminder_hours' => [1, 2, 3, 4, 6, 12, 24],
     'default_reminder_hours' => 3,
+    'daily_reminder_time' => '18:00',
     'per_page_options' => [25, 50, 100],
     'default_per_page' => 25,
     'default_deadline_time' => '23:59',

@@ -45,7 +45,7 @@
         <div class="card-body">
             @if ($logs->isEmpty())
                 <x-empty-state title="No emails sent yet.">
-                    Automatic deadline reminders and manual status reminders will appear here after they are queued.
+                    Automatic deadline reminders, daily reminders, and manual status reminders will appear here after they are queued.
                 </x-empty-state>
             @else
                 <div class="d-none d-lg-block table-responsive">

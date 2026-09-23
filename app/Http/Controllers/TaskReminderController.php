@@ -2,24 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\EmailLogType;
 use App\Http\Requests\SendTaskReminderRequest;
-use App\Mail\StatusReminderMail;
 use App\Models\Task;
-use App\Services\EmailLogService;
-use App\Services\EmailSettingsService;
-use App\Services\StatusReminderTemplateService;
+use App\Services\StatusReminderSender;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Mail;
 
 class TaskReminderController extends Controller
 {
     public function store(
         SendTaskReminderRequest $request,
         Task $task,
-        StatusReminderTemplateService $templates,
-        EmailSettingsService $emailSettings,
-        EmailLogService $emailLogs,
+        StatusReminderSender $sender,
     ): RedirectResponse {
         $this->authorize('remind', $task);
 
@@ -29,29 +22,11 @@ class TaskReminderController extends Controller
             return back()->with('error', 'WhatsApp reminders are not available yet.');
         }
 
-        $emails = $task->developerEmails();
+        $emails = $sender->queue($task, $request->user());
 
         if ($emails === []) {
             return back()->with('error', 'This task has no developer email to send to.');
         }
-
-        $message = $templates->render($request->user(), $task);
-
-        Mail::to($emails)->queue(new StatusReminderMail(
-            $task->loadMissing(['project', 'developers', 'attachments']),
-            $message['subject'],
-            $message['body'],
-            $emailSettings->fromName($request->user()),
-        ));
-
-        $emailLogs->record(
-            EmailLogType::StatusReminder,
-            $emails,
-            $message['subject'],
-            $message['body'],
-            $task,
-            $request->user(),
-        );
 
         return back()->with('success', 'Email reminder queued for '.implode(', ', $emails).'.');
     }

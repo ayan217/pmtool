@@ -76,7 +76,8 @@ class TaskController extends Controller
 
         return redirect()
             ->route('tasks.show', $task)
-            ->with('success', 'Task created successfully.');
+            ->with('success', 'Task created successfully.')
+            ->with('ask_reminder', true);
     }
 
     public function show(Task $task): View
@@ -182,5 +183,4 @@ class TaskController extends Controller
 
         return back()->with('success', 'Task restored.');
     }
-
 }

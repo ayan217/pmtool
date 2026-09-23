@@ -37,11 +37,19 @@ class TaskTest extends TestCase
         $task = Task::query()->first();
 
         $response->assertRedirect(route('tasks.show', $task));
+        $response->assertSessionHas('ask_reminder', true);
         $this->assertDatabaseHas('tasks', [
             'title' => 'Fix WhatsApp Notification',
             'developer' => 'Rahul',
             'project_id' => null,
         ]);
+
+        $this->actingAs($this->user)
+            ->withSession(['ask_reminder' => true])
+            ->get(route('tasks.show', $task))
+            ->assertOk()
+            ->assertSee('Send a reminder now?', false)
+            ->assertSee('data-pm-open-on-load', false);
     }
 
     public function test_standalone_task_creation(): void

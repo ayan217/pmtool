@@ -24,11 +24,18 @@
                     <div class="form-text">Shown as the sender name on emails to developers and on admin reminders.</div>
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="form-label" for="admin_email">Admin email address</label>
                     <input id="admin_email" type="email" name="admin_email" value="{{ old('admin_email', $settings['admin_email']) }}" class="form-control @error('admin_email') is-invalid @enderror" required maxlength="255">
                     @error('admin_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     <div class="form-text">Deadline reminders and other admin emails are sent here, not to your login email unless they match.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="daily_reminder_time">Daily reminder time</label>
+                    <input id="daily_reminder_time" type="time" name="daily_reminder_time" value="{{ old('daily_reminder_time', $settings['daily_reminder_time']) }}" class="form-control @error('daily_reminder_time') is-invalid @enderror" required>
+                    @error('daily_reminder_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="form-text">Open tasks get a status reminder at this time ({{ config('app.timezone') }}). Deadline reminders still go out 3 hours before the due time — change that under Settings.</div>
                 </div>
 
                 <div class="d-flex justify-content-end">
