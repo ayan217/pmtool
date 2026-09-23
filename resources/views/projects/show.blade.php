@@ -63,12 +63,12 @@
         <div class="card-body">
             <h2 class="h5 mb-3">Tasks</h2>
             @forelse ($tasks as $task)
-                <div class="d-flex justify-content-between gap-3 border-bottom py-2">
+                <div class="d-flex flex-wrap justify-content-between gap-2 border-bottom py-2">
                     <div>
                         <a href="{{ route('tasks.show', $task) }}" class="task-link">{{ $task->title }}</a>
                         <div class="small text-secondary">{{ $task->developer ?: 'Unassigned' }}</div>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
                         <x-priority-badge :priority="$task->priority" />
                         <x-status-badge :status="$task->status" />
                     </div>

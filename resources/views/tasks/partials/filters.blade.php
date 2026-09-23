@@ -36,11 +36,17 @@
             <input type="hidden" name="quick" value="{{ $quick }}">
         @endif
 
+        <div class="mb-3">
+            <label class="form-label">Search</label>
+            <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" class="form-control" placeholder="Title, notes, comments, project...">
+        </div>
+
+        <button class="btn btn-sm btn-outline-secondary d-lg-none mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters">
+            More filters
+        </button>
+
+        <div class="collapse d-lg-block" id="advancedFilters">
         <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Search</label>
-                <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" class="form-control" placeholder="Title, notes, comments, project...">
-            </div>
             <div class="col-md-2">
                 <label class="form-label">Project</label>
                 <select name="project" class="form-select">
@@ -120,6 +126,7 @@
                     @endforeach
                 </select>
             </div>
+        </div>
         </div>
     </div>
 </form>

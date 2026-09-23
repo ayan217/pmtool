@@ -14,6 +14,10 @@ body {
     min-height: 100%;
 }
 
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
 body.app-body {
     background: var(--pm-bg);
     color: var(--pm-ink);
@@ -189,6 +193,73 @@ body.app-body {
 
 .mobile-navbar {
     background: var(--pm-sidebar);
+    padding-top: calc(0.35rem + env(safe-area-inset-top));
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+.app-offcanvas {
+    background: var(--pm-sidebar);
+    color: #f6f1e8;
+}
+
+.app-offcanvas .offcanvas-header,
+.app-offcanvas .offcanvas-body {
+    padding-left: calc(1rem + env(safe-area-inset-left));
+    padding-right: calc(1rem + env(safe-area-inset-right));
+}
+
+.app-offcanvas .sidebar-nav {
+    height: 100%;
+}
+
+.mobile-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1030;
+    display: flex;
+    background: var(--pm-sidebar);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.25rem 0.2rem calc(0.25rem + env(safe-area-inset-bottom));
+}
+
+.mobile-tabbar a,
+.mobile-tabbar button {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: #d7d0c3;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.4rem 0.15rem;
+    font-size: 0.68rem;
+    line-height: 1.1;
+}
+
+.mobile-tabbar a.active,
+.mobile-tabbar a:hover,
+.mobile-tabbar button:hover {
+    color: #fff;
+}
+
+.mobile-tabbar i {
+    font-size: 1.15rem;
+}
+
+.calendar-shell {
+    min-width: 0;
+}
+
+.calendar-shell .fc {
+    min-width: 0;
 }
 
 .deadline-overdue {
@@ -215,6 +286,104 @@ body.app-body {
     }
 
     .app-main {
-        padding: 1rem;
+        padding: 1rem 1rem calc(5.75rem + env(safe-area-inset-bottom));
+    }
+
+    .toast-container {
+        bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
+    }
+
+    .page-title {
+        font-size: 1.45rem;
+        overflow-wrap: anywhere;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.45rem;
+    }
+
+    .form-control,
+    .form-select,
+    .btn:not(.btn-sm):not(.btn-close) {
+        min-height: 44px;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 16px;
+    }
+
+    .quick-filters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.2rem;
+    }
+
+    .quick-filters .btn {
+        flex: 0 0 auto;
+    }
+
+    .table-responsive,
+    .card-body {
+        min-width: 0;
+    }
+
+    .modal-dialog {
+        margin: 0.75rem;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+    .calendar-shell .fc .fc-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.55rem;
+    }
+
+    .calendar-shell .fc .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .calendar-shell .fc .fc-toolbar-title {
+        font-size: 1.05rem;
+        text-align: center;
+    }
+
+    .calendar-shell .fc .fc-button {
+        padding: 0.35rem 0.55rem;
+        font-size: 0.8rem;
+    }
+
+    .calendar-shell .fc .fc-col-header-cell-cushion,
+    .calendar-shell .fc .fc-daygrid-day-number {
+        font-size: 0.72rem;
+        padding: 0.2rem;
+    }
+
+    .calendar-shell .fc-event,
+    .calendar-shell .fc-list-event-title {
+        font-size: 0.8rem;
+        overflow-wrap: anywhere;
+    }
+
+    .calendar-shell .fc-daygrid-event {
+        white-space: normal;
+    }
+
+    .calendar-shell .fc-list-event-time {
+        min-width: 4.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .mobile-tabbar {
+        display: none !important;
     }
 }

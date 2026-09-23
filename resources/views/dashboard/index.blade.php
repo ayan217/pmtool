@@ -65,9 +65,9 @@
                 <div class="card-body">
                     <h2 class="h5 mb-3">Due today</h2>
                     @forelse ($todayDeadlines as $row)
-                        <div class="d-flex justify-content-between gap-3 border-bottom py-2">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 border-bottom py-2">
                             <a href="{{ route('tasks.show', $row['task']) }}" class="task-link">{{ $row['task']->title }}</a>
-                            <div class="small text-nowrap">
+                            <div class="small">
                                 <span class="badge {{ $row['type']->badgeClass() }}">{{ $row['type']->shortLabel() }}</span>
                                 {{ $row['deadline']->timezone(config('app.timezone'))->format('g:i A') }}
                             </div>
@@ -83,7 +83,20 @@
             <div class="card pm-card">
                 <div class="card-body">
                     <h2 class="h5 mb-3">Upcoming Deadlines</h2>
-                    <div class="table-responsive">
+                    <div class="d-lg-none">
+                        @forelse ($upcomingDeadlines as $row)
+                            <div class="d-flex flex-wrap justify-content-between gap-2 border-bottom py-2">
+                                <a href="{{ route('tasks.show', $row['task']) }}" class="task-link">{{ $row['task']->title }}</a>
+                                <div class="small text-secondary">
+                                    <span class="badge {{ $row['type']->badgeClass() }}">{{ $row['type']->shortLabel() }}</span>
+                                    {{ $row['deadline']->timezone(config('app.timezone'))->calendar() }}
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-secondary mb-0">No upcoming deadlines.</p>
+                        @endforelse
+                    </div>
+                    <div class="table-responsive d-none d-lg-block">
                         <table class="table align-middle mb-0">
                             <thead>
                                 <tr>
@@ -116,7 +129,7 @@
                 <div class="card-body">
                     <h2 class="h5 mb-3">Recently Updated</h2>
                     @forelse ($recentlyUpdated as $task)
-                        <div class="d-flex justify-content-between gap-3 border-bottom py-2">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 border-bottom py-2">
                             <div>
                                 <a href="{{ route('tasks.show', $task) }}" class="task-link">{{ $task->title }}</a>
                                 <div class="small text-secondary">
@@ -140,7 +153,7 @@
                 <div class="card-body">
                     <h2 class="h5 mb-3">Recently Completed</h2>
                     @forelse ($recentlyCompleted as $task)
-                        <div class="d-flex justify-content-between gap-3 border-bottom py-2">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 border-bottom py-2">
                             <div>
                                 <a href="{{ route('tasks.show', $task) }}" class="task-link">{{ $task->title }}</a>
                                 <div class="small text-secondary">{{ $task->project?->name ?? 'No project' }}</div>

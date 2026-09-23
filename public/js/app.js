@@ -300,4 +300,19 @@
             window.location.href = fallback;
         });
     });
+
+    document.querySelectorAll('#appOffcanvas a').forEach((link) => {
+        link.addEventListener('click', () => {
+            const offcanvas = document.getElementById('appOffcanvas');
+            if (offcanvas && window.bootstrap?.Offcanvas) {
+                window.bootstrap.Offcanvas.getInstance(offcanvas)?.hide();
+            }
+        });
+    });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+    }
 })();
