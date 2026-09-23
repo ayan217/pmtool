@@ -66,10 +66,14 @@ class StatusReminderTemplateService
      */
     protected function replacements(Task $task): array
     {
+        $task->loadMissing('project');
         $description = trim((string) $task->description);
+        $project = trim((string) ($task->project?->name ?? ''));
 
         return [
             '{task.title}' => $task->title,
+            '{task.project}' => $project !== '' ? $project : 'No project',
+            '{project.name}' => $project !== '' ? $project : 'No project',
             '{task.des}' => $description !== '' ? $description : 'No description yet.',
             '{task.description}' => $description !== '' ? $description : 'No description yet.',
             '{remaining.hours}' => $task->remainingHoursLabel(),

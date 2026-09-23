@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\StatusReminderMail;
 use App\Models\EmailLog;
+use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\StatusReminderTemplateService;
@@ -81,6 +82,37 @@ class StatusReminderTest extends TestCase
             'subject' => 'API handover',
         ]);
         $this->assertSame(['rahul@example.com'], EmailLog::query()->first()->recipients);
+    }
+
+    public function test_email_reminder_includes_task_title_and_project_name(): void
+    {
+        $project = Project::factory()->create(['name' => 'CRM Tool']);
+        $task = Task::factory()->create([
+            'title' => 'API handover',
+            'project_id' => $project->id,
+        ]);
+        $task->syncDevelopers([
+            [
+                'name' => 'Rahul',
+                'email' => 'rahul@example.com',
+                'phone' => null,
+            ],
+        ]);
+
+        $this->actingAs($this->user)
+            ->post(route('tasks.reminders.store', $task), [
+                'channel' => 'email',
+            ])
+            ->assertRedirect();
+
+        Mail::assertQueued(StatusReminderMail::class, function (StatusReminderMail $mail) {
+            $html = $mail->render();
+
+            return str_contains($html, 'API handover')
+                && str_contains($html, 'CRM Tool')
+                && str_contains($html, 'Task:')
+                && str_contains($html, 'Project:');
+        });
     }
 
     public function test_email_reminder_attaches_task_documents(): void

@@ -32,6 +32,8 @@ class StatusReminderMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
+        $this->task->loadMissing('project');
+
         return new Content(
             view: 'emails.status-reminder',
         );

@@ -33,6 +33,7 @@
                 <div class="small text-secondary mb-4">
                     Available placeholders:
                     <code>{task.title}</code>,
+                    <code>{project.name}</code>,
                     <code>{task.des}</code>,
                     <code>{remaining.hours}</code>
                 </div>
