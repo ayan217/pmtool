@@ -33,11 +33,10 @@ class StoreTaskRequest extends FormRequest
             'developers.*.email' => ['nullable', 'email', 'max:255'],
             'developers.*.phone' => ['nullable', 'string', 'max:30'],
             'priority' => ['required', Rule::enum(TaskPriority::class)],
-            'status' => ['required', Rule::in([
-                TaskStatus::Pending->value,
-                TaskStatus::InProgress->value,
-                TaskStatus::Blocked->value,
-            ])],
+            'status' => ['required', Rule::in(array_map(
+                fn (TaskStatus $status) => $status->value,
+                TaskStatus::activeCases(),
+            ))],
             'description' => ['nullable', 'string', 'max:10000'],
             'notes' => ['nullable', 'string', 'max:10000'],
             'dev_deadline_date' => ['nullable', 'date'],

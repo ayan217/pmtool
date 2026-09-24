@@ -108,6 +108,24 @@ class DailyReminderTest extends TestCase
         Mail::assertNothingQueued();
     }
 
+    public function test_on_client_review_tasks_do_not_get_daily_reminders(): void
+    {
+        $task = Task::factory()->onClientReview()->create();
+        $task->syncDevelopers([
+            [
+                'name' => 'Rahul',
+                'email' => 'rahul@example.com',
+                'phone' => null,
+            ],
+        ]);
+
+        Carbon::setTestNow(Carbon::parse('2026-09-23 18:05:00', 'Asia/Kolkata'));
+
+        $this->assertSame(0, $this->reminders()->sendDueReminders()['sent']);
+        Mail::assertNothingQueued();
+        $this->assertDatabaseCount('email_logs', 0);
+    }
+
     public function test_command_sends_daily_reminders_after_six_pm(): void
     {
         $this->openTask();

@@ -236,6 +236,16 @@ class Task extends Model
         return ! $this->isCompleted() && ! $this->isArchived();
     }
 
+    public function isOnClientReview(): bool
+    {
+        return $this->status === TaskStatus::OnClientReview;
+    }
+
+    public function acceptsEmails(): bool
+    {
+        return $this->isActive() && ! $this->isOnClientReview();
+    }
+
     public function isDevOverdue(): bool
     {
         return $this->isDeadlineOverdue(DeadlineType::Dev);

@@ -67,7 +67,7 @@ class TaskQuery
     {
         $status = $this->stringValue($filters['status'] ?? null);
 
-        return in_array($quick, ['all', 'today', 'tomorrow', 'this_week', 'overdue', 'in_progress', 'completed', 'archived', 'no_project'], true)
+        return in_array($quick, ['all', 'today', 'tomorrow', 'this_week', 'overdue', 'in_progress', 'on_client_review', 'completed', 'archived', 'no_project'], true)
             || in_array($status, TaskStatus::values(), true)
             || filled($filters['completed_from'] ?? null)
             || filled($filters['completed_to'] ?? null);
@@ -82,6 +82,7 @@ class TaskQuery
             'this_week' => $this->whereDeadlineBetween($query, now()->startOfWeek(), now()->endOfWeek()),
             'overdue' => $query->overdue(),
             'in_progress' => $query->notArchived()->where('status', TaskStatus::InProgress),
+            'on_client_review' => $query->notArchived()->where('status', TaskStatus::OnClientReview),
             'completed' => $query->completed(),
             'archived' => $query->archived(),
             'no_project' => $query->notArchived()->whereNull('project_id'),

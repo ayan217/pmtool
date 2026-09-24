@@ -22,6 +22,10 @@ class TaskReminderController extends Controller
             return back()->with('error', 'WhatsApp reminders are not available yet.');
         }
 
+        if ($task->isOnClientReview()) {
+            return back()->with('error', 'Reminders are paused while this task is on client review.');
+        }
+
         $emails = $sender->queue($task, $request->user());
 
         if ($emails === []) {

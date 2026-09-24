@@ -120,6 +120,25 @@ class TaskTest extends TestCase
         ]);
     }
 
+    public function test_task_can_be_set_to_on_client_review(): void
+    {
+        $task = Task::factory()->create();
+
+        $this->actingAs($this->user)
+            ->put(route('tasks.update', $task), $this->payload([
+                'title' => $task->title,
+                'status' => TaskStatus::OnClientReview->value,
+            ]))
+            ->assertRedirect(route('tasks.show', $task));
+
+        $this->assertSame(TaskStatus::OnClientReview, $task->fresh()->status);
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.show', $task))
+            ->assertOk()
+            ->assertSee('On Client Review');
+    }
+
     public function test_task_completion(): void
     {
         $task = Task::factory()->create();

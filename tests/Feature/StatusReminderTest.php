@@ -182,6 +182,29 @@ class StatusReminderTest extends TestCase
         });
     }
 
+    public function test_email_reminder_is_not_sent_when_task_is_on_client_review(): void
+    {
+        $task = Task::factory()->onClientReview()->create();
+        $task->syncDevelopers([
+            [
+                'name' => 'Rahul',
+                'email' => 'rahul@example.com',
+                'phone' => null,
+            ],
+        ]);
+
+        $this->actingAs($this->user)
+            ->from(route('tasks.show', $task))
+            ->post(route('tasks.reminders.store', $task), [
+                'channel' => 'email',
+            ])
+            ->assertRedirect(route('tasks.show', $task))
+            ->assertSessionHas('error', 'Reminders are paused while this task is on client review.');
+
+        Mail::assertNothingQueued();
+        $this->assertDatabaseCount('email_logs', 0);
+    }
+
     public function test_email_reminder_requires_a_developer_email(): void
     {
         $task = Task::factory()->create([

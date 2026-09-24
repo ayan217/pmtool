@@ -71,6 +71,17 @@ class DeadlineReminderTest extends TestCase
         Mail::assertNothingQueued();
     }
 
+    public function test_on_client_review_tasks_do_not_generate_deadline_reminders(): void
+    {
+        $task = Task::factory()->onClientReview()->create([
+            'dev_deadline' => now()->addHours(2),
+        ]);
+
+        $this->assertFalse($this->reminders()->dispatchReminder($this->user, $task, DeadlineType::Dev, 3));
+        Mail::assertNothingQueued();
+        $this->assertDatabaseCount('email_logs', 0);
+    }
+
     public function test_duplicate_reminders_are_not_generated(): void
     {
         $task = Task::factory()->create([

@@ -21,6 +21,10 @@ class StatusReminderSender
      */
     public function queue(Task $task, User $user, EmailLogType $type = EmailLogType::StatusReminder): array
     {
+        if (! $task->acceptsEmails()) {
+            return [];
+        }
+
         $emails = $task->developerEmails();
 
         if ($emails === []) {

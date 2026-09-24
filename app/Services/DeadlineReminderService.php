@@ -56,7 +56,7 @@ class DeadlineReminderService
 
         $tasks = Task::query()
             ->with(['project', 'developers', 'attachments'])
-            ->whereNotIn('status', [TaskStatus::Completed, TaskStatus::Archived])
+            ->whereNotIn('status', [TaskStatus::Completed, TaskStatus::Archived, TaskStatus::OnClientReview])
             ->whereNull('archived_at')
             ->whereNull('completed_at')
             ->whereNotNull($column)
@@ -82,7 +82,7 @@ class DeadlineReminderService
     {
         $now ??= now();
 
-        if ($task->isCompleted() || $task->isArchived()) {
+        if (! $task->acceptsEmails()) {
             return false;
         }
 

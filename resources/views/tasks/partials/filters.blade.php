@@ -7,6 +7,7 @@
         'this_week' => 'This Week',
         'overdue' => 'Overdue',
         'in_progress' => 'In Progress',
+        'on_client_review' => 'On Client Review',
         'completed' => 'Completed',
         'archived' => 'Archived',
         'no_project' => 'No Project',

@@ -56,7 +56,7 @@ class DailyReminderService
 
     public function dispatch(User $user, Task $task, ?string $sentOn = null): bool
     {
-        if (! $task->isActive() || $task->developerEmails() === []) {
+        if (! $task->acceptsEmails() || $task->developerEmails() === []) {
             return false;
         }
 

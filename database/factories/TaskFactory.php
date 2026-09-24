@@ -36,6 +36,13 @@ class TaskFactory extends Factory
         ]);
     }
 
+    public function onClientReview(): static
+    {
+        return $this->state(fn () => [
+            'status' => TaskStatus::OnClientReview,
+        ]);
+    }
+
     public function completed(): static
     {
         return $this->state(fn () => [
