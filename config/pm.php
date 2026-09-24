@@ -28,6 +28,6 @@ return [
 
     'status_reminder' => [
         'subject' => '{task.title}',
-        'body' => "hi team,\n\nplease share the status of this task, the deadline is in {remaining.hours}, if any delay is happening please contact me personally over call or whatsapp.\n\n{task.des}",
+        'body' => "Task: {task.title}\nProject: {project.name}\n\nhi team,\n\nplease share the status of this task, the deadline is in {remaining.hours}, if any delay is happening please contact me personally over call or whatsapp.\n\n{task.des}",
     ],
 ];

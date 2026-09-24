@@ -49,7 +49,7 @@
     <div class="card pm-card">
         <div class="card-body">
             <div class="small text-secondary mb-2">Body</div>
-            <div style="white-space: pre-wrap;">{{ $log->body ?: 'No body was stored for this email.' }}</div>
+            <div style="white-space: pre-wrap;">{{ $log->displayBody() }}</div>
         </div>
     </div>
 @endsection

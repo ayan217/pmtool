@@ -31,9 +31,10 @@
                 </div>
 
                 <div class="small text-secondary mb-4">
-                    Available placeholders:
+                    Task title and project name are part of the default body. Available placeholders:
                     <code>{task.title}</code>,
                     <code>{project.name}</code>,
+                    <code>{task.project}</code>,
                     <code>{task.des}</code>,
                     <code>{remaining.hours}</code>
                 </div>

@@ -72,6 +72,14 @@ class EmailReportTest extends TestCase
             ->assertSee('Status reminder')
             ->assertSee('API handover')
             ->assertSee('rahul@example.com');
+
+        $log = EmailLog::query()->first();
+        $this->assertNotNull($log);
+
+        $this->actingAs($this->user)
+            ->get(route('email-report.show', $log))
+            ->assertOk()
+            ->assertSee('Task: API handover', false);
     }
 
     public function test_deadline_reminder_appears_on_the_email_report(): void

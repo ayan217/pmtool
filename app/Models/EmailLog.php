@@ -52,4 +52,30 @@ class EmailLog extends Model
             ->filter()
             ->implode(', ') ?: '—';
     }
+
+    public function displayBody(): string
+    {
+        $body = trim((string) $this->body);
+
+        if ($body === '') {
+            return 'No body was stored for this email.';
+        }
+
+        if (
+            ! $this->task
+            || ! in_array($this->type, [EmailLogType::StatusReminder, EmailLogType::DailyReminder], true)
+            || str_contains($body, 'Task: '.$this->task->title)
+        ) {
+            return $body;
+        }
+
+        $this->loadMissing('task.project');
+        $project = trim((string) ($this->task->project?->name ?? ''));
+        $header = implode("\n", [
+            'Task: '.$this->task->title,
+            'Project: '.($project !== '' ? $project : 'No project'),
+        ]);
+
+        return $header."\n\n".$body;
+    }
 }

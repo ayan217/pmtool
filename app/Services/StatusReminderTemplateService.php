@@ -33,7 +33,11 @@ class StatusReminderTemplateService
         $defaults = $this->defaults();
 
         $subject = trim((string) ($stored->get(self::KEY_SUBJECT) ?? ''));
-        $body = trim((string) ($stored->get(self::KEY_BODY) ?? ''));
+        $body = $this->normalizeLineEndings(trim((string) ($stored->get(self::KEY_BODY) ?? '')));
+
+        if ($this->isLegacyDefaultBody($body)) {
+            $body = '';
+        }
 
         return [
             'subject' => $subject !== '' ? $subject : $defaults['subject'],
@@ -54,10 +58,15 @@ class StatusReminderTemplateService
     {
         $template = $this->forUser($user);
         $replacements = $this->replacements($task);
+        $body = strtr($template['body'], $replacements);
+
+        if (! $this->templateIncludesIdentity($template['body'])) {
+            $body = $this->identityHeader($task)."\n\n".$body;
+        }
 
         return [
             'subject' => strtr($template['subject'], $replacements),
-            'body' => strtr($template['body'], $replacements),
+            'body' => $body,
         ];
     }
 
@@ -78,5 +87,37 @@ class StatusReminderTemplateService
             '{task.description}' => $description !== '' ? $description : 'No description yet.',
             '{remaining.hours}' => $task->remainingHoursLabel(),
         ];
+    }
+
+    protected function identityHeader(Task $task): string
+    {
+        $task->loadMissing('project');
+        $project = trim((string) ($task->project?->name ?? ''));
+
+        return implode("\n", [
+            'Task: '.$task->title,
+            'Project: '.($project !== '' ? $project : 'No project'),
+        ]);
+    }
+
+    protected function templateIncludesIdentity(string $body): bool
+    {
+        return str_contains($body, '{task.title}')
+            && (str_contains($body, '{project.name}') || str_contains($body, '{task.project}'));
+    }
+
+    protected function isLegacyDefaultBody(string $body): bool
+    {
+        return $body === $this->legacyDefaultBody();
+    }
+
+    protected function legacyDefaultBody(): string
+    {
+        return "hi team,\n\nplease share the status of this task, the deadline is in {remaining.hours}, if any delay is happening please contact me personally over call or whatsapp.\n\n{task.des}";
+    }
+
+    protected function normalizeLineEndings(string $value): string
+    {
+        return str_replace(["\r\n", "\r"], "\n", $value);
     }
 }

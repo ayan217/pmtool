@@ -30,6 +30,34 @@ class StatusReminderTest extends TestCase
         $this->user = User::factory()->create();
     }
 
+    public function test_email_template_defaults_include_task_title_and_project_name(): void
+    {
+        $template = app(StatusReminderTemplateService::class)->forUser($this->user);
+
+        $this->assertStringContainsString('{task.title}', $template['body']);
+        $this->assertStringContainsString('{project.name}', $template['body']);
+
+        $this->actingAs($this->user)
+            ->get(route('email-templates.edit'))
+            ->assertOk()
+            ->assertSee('Task: {task.title}', false)
+            ->assertSee('Project: {project.name}', false);
+    }
+
+    public function test_saved_legacy_template_is_upgraded_to_include_title_and_project(): void
+    {
+        app(StatusReminderTemplateService::class)->update(
+            $this->user,
+            '{task.title}',
+            "hi team,\n\nplease share the status of this task, the deadline is in {remaining.hours}, if any delay is happening please contact me personally over call or whatsapp.\n\n{task.des}",
+        );
+
+        $template = app(StatusReminderTemplateService::class)->forUser($this->user->fresh());
+
+        $this->assertStringContainsString('Task: {task.title}', $template['body']);
+        $this->assertStringContainsString('Project: {project.name}', $template['body']);
+    }
+
     public function test_email_template_can_be_updated(): void
     {
         $this->actingAs($this->user)
@@ -108,11 +136,22 @@ class StatusReminderTest extends TestCase
         Mail::assertQueued(StatusReminderMail::class, function (StatusReminderMail $mail) {
             $html = $mail->render();
 
-            return str_contains($html, 'API handover')
-                && str_contains($html, 'CRM Tool')
-                && str_contains($html, 'Task:')
-                && str_contains($html, 'Project:');
+            return str_contains($mail->bodyText, 'Task: API handover')
+                && str_contains($mail->bodyText, 'Project: CRM Tool')
+                && str_contains($html, 'Task: API handover')
+                && str_contains($html, 'Project: CRM Tool');
         });
+
+        $log = EmailLog::query()->first();
+        $this->assertNotNull($log);
+        $this->assertStringContainsString('Task: API handover', $log->body);
+        $this->assertStringContainsString('Project: CRM Tool', $log->body);
+
+        $this->actingAs($this->user)
+            ->get(route('email-report.show', $log))
+            ->assertOk()
+            ->assertSee('Task: API handover', false)
+            ->assertSee('Project: CRM Tool', false);
     }
 
     public function test_email_reminder_attaches_task_documents(): void
