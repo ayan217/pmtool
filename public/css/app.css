@@ -16,6 +16,7 @@ body {
 
 html {
     -webkit-text-size-adjust: 100%;
+    scrollbar-gutter: stable;
 }
 
 body.app-body {
@@ -29,7 +30,10 @@ body.app-body {
 }
 
 .sidebar {
+    flex: 0 0 260px;
     width: 260px;
+    min-width: 260px;
+    max-width: 260px;
     background: var(--pm-sidebar);
     color: #f6f1e8;
     position: sticky;
@@ -38,6 +42,9 @@ body.app-body {
     display: flex;
     flex-direction: column;
     padding: 1.4rem 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .sidebar-brand {
@@ -69,6 +76,14 @@ body.app-body {
     display: flex;
     align-items: center;
     gap: 0.7rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.sidebar-nav i {
+    width: 1.2rem;
+    flex-shrink: 0;
+    text-align: center;
 }
 
 .sidebar-nav a:hover,
