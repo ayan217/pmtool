@@ -6,6 +6,7 @@ use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Requests\UpdateTaskStatusRequest;
 use App\Models\Developer;
 use App\Models\Project;
 use App\Models\Task;
@@ -110,40 +111,28 @@ class TaskController extends Controller
             'title',
             'project_id',
             'priority',
-            'status',
             'description',
             'notes',
             'dev_deadline',
             'client_deadline',
         ]);
 
-        $status = TaskStatus::from($data['status']);
-
-        if ($status === TaskStatus::Completed && ! $task->isCompleted()) {
-            $data['completed_at'] = now();
-        }
-
-        if ($status !== TaskStatus::Completed) {
-            $data['completed_at'] = $status === TaskStatus::Archived ? $task->completed_at : null;
-        }
-
-        if ($status === TaskStatus::Archived && ! $task->isArchived()) {
-            $data['previous_status'] = $task->status;
-            $data['archived_at'] = now();
-        }
-
-        if ($status !== TaskStatus::Archived) {
-            $data['archived_at'] = null;
-            $data['previous_status'] = null;
-        }
-
-        $task->update($data);
+        $task->applyStatus(TaskStatus::from($request->validated('status')), $data);
         $task->syncDevelopers($request->validated('developers') ?? []);
         $task->storeAttachments($request->file('attachments', []));
 
         return redirect()
             ->route('tasks.show', $task)
             ->with('success', 'Task updated successfully.');
+    }
+
+    public function updateStatus(UpdateTaskStatusRequest $request, Task $task): RedirectResponse
+    {
+        $this->authorize('update', $task);
+
+        $task->applyStatus(TaskStatus::from($request->validated('status')));
+
+        return back()->with('success', 'Task status updated.');
     }
 
     public function destroy(Task $task): RedirectResponse

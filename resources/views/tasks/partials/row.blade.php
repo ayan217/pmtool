@@ -8,7 +8,7 @@
     <td>{{ $task->project?->name ?? '—' }}</td>
     <td>{{ $task->developer ?: '—' }}</td>
     <td><x-priority-badge :priority="$task->priority" /></td>
-    <td><x-status-badge :status="$task->status" /></td>
+    <td>@include('tasks.partials.status-form')</td>
     <td><x-deadline :date="$task->dev_deadline" :overdue="$task->isDevOverdue()" /></td>
     <td><x-deadline :date="$task->client_deadline" :overdue="$task->isClientOverdue()" /></td>
     <td class="text-nowrap">

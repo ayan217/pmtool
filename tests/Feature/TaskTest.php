@@ -139,6 +139,61 @@ class TaskTest extends TestCase
             ->assertSee('On Client Review');
     }
 
+    public function test_guests_cannot_update_task_status_from_the_list(): void
+    {
+        $task = Task::factory()->create();
+
+        $this->patch(route('tasks.status.update', $task), [
+            'status' => TaskStatus::InProgress->value,
+        ])->assertRedirect(route('login'));
+
+        $this->assertSame(TaskStatus::Pending, $task->fresh()->status);
+    }
+
+    public function test_task_list_shows_a_status_dropdown_and_save(): void
+    {
+        $task = Task::factory()->create(['title' => 'Inline status task']);
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.index'))
+            ->assertOk()
+            ->assertSee('Inline status task')
+            ->assertSee('name="status"', false)
+            ->assertSee('>Save</button>', false)
+            ->assertSee(route('tasks.status.update', $task), false);
+    }
+
+    public function test_task_status_can_be_updated_from_the_list(): void
+    {
+        $task = Task::factory()->create(['status' => TaskStatus::Pending]);
+
+        $this->actingAs($this->user)
+            ->from(route('tasks.index', ['q' => 'inline']))
+            ->patch(route('tasks.status.update', $task), [
+                'status' => TaskStatus::InProgress->value,
+            ])
+            ->assertRedirect(route('tasks.index', ['q' => 'inline']))
+            ->assertSessionHas('success');
+
+        $this->assertSame(TaskStatus::InProgress, $task->fresh()->status);
+    }
+
+    public function test_task_list_status_change_to_completed_sets_completed_at(): void
+    {
+        $task = Task::factory()->create(['status' => TaskStatus::InProgress]);
+
+        $this->actingAs($this->user)
+            ->from(route('tasks.index'))
+            ->patch(route('tasks.status.update', $task), [
+                'status' => TaskStatus::Completed->value,
+            ])
+            ->assertRedirect();
+
+        $task->refresh();
+        $this->assertSame(TaskStatus::Completed, $task->status);
+        $this->assertNotNull($task->completed_at);
+    }
+
     public function test_task_completion(): void
     {
         $task = Task::factory()->create();

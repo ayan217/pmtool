@@ -6,9 +6,9 @@
             · <i class="bi bi-paperclip"></i> {{ $task->attachments_count }} {{ \Illuminate\Support\Str::plural('doc', $task->attachments_count) }}
         @endif
     </div>
-    <div class="d-flex flex-wrap gap-2 my-2">
+    <div class="d-flex flex-wrap align-items-center gap-2 my-2">
         <x-priority-badge :priority="$task->priority" />
-        <x-status-badge :status="$task->status" />
+        @include('tasks.partials.status-form')
     </div>
     <div class="small mb-2">
         <x-deadline :date="$task->dev_deadline" :type="\App\Enums\DeadlineType::Dev" :overdue="$task->isDevOverdue()" />

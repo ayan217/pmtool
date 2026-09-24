@@ -134,6 +134,14 @@ body.app-body {
     border-bottom-color: var(--pm-line);
 }
 
+.task-status-form {
+    min-width: 12.5rem;
+}
+
+.task-status-form .form-select {
+    min-width: 8.5rem;
+}
+
 .task-link {
     color: var(--pm-ink);
     font-weight: 650;

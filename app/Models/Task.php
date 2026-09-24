@@ -308,23 +308,22 @@ class Task extends Model
             ->all();
     }
 
+    /**
+     * @param  array<string, mixed>  $extra
+     */
+    public function applyStatus(TaskStatus $status, array $extra = []): void
+    {
+        $this->update(array_merge($extra, $this->statusPayload($status)));
+    }
+
     public function complete(): void
     {
-        $this->update([
-            'status' => TaskStatus::Completed,
-            'completed_at' => now(),
-        ]);
+        $this->applyStatus(TaskStatus::Completed);
     }
 
     public function archive(): void
     {
-        $this->update([
-            'previous_status' => $this->status === TaskStatus::Archived
-                ? ($this->previous_status ?? TaskStatus::Pending)
-                : $this->status,
-            'status' => TaskStatus::Archived,
-            'archived_at' => now(),
-        ]);
+        $this->applyStatus(TaskStatus::Archived);
     }
 
     public function restore(): void
@@ -343,5 +342,31 @@ class Task extends Model
                 ? ($this->completed_at ?? now())
                 : null,
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function statusPayload(TaskStatus $status): array
+    {
+        $payload = ['status' => $status];
+
+        if ($status === TaskStatus::Completed) {
+            $payload['completed_at'] = $this->isCompleted() ? $this->completed_at : now();
+        } elseif ($status !== TaskStatus::Archived) {
+            $payload['completed_at'] = null;
+        }
+
+        if ($status === TaskStatus::Archived) {
+            if (! $this->isArchived()) {
+                $payload['previous_status'] = $this->status;
+                $payload['archived_at'] = now();
+            }
+        } else {
+            $payload['archived_at'] = null;
+            $payload['previous_status'] = null;
+        }
+
+        return $payload;
     }
 }
