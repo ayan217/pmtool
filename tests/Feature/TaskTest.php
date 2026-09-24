@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class TaskTest extends TestCase
@@ -166,6 +167,24 @@ class TaskTest extends TestCase
             ->assertSee('bi-eye', false)
             ->assertSee('bi-pencil', false)
             ->assertDontSee(route('tasks.complete', $task), false);
+    }
+
+    public function test_task_list_shows_a_compact_deadline(): void
+    {
+        config(['app.timezone' => 'Asia/Kolkata']);
+
+        Task::factory()->create([
+            'title' => 'Compact deadline task',
+            'dev_deadline' => Carbon::parse('2026-09-21 23:00:00', 'Asia/Kolkata'),
+        ]);
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.index'))
+            ->assertOk()
+            ->assertSee('Compact deadline task')
+            ->assertSee('OVERDUE', false)
+            ->assertSee('Sep 21, 2026, 11:00 PM', false)
+            ->assertSee('deadline-when', false);
     }
 
     public function test_task_status_can_be_updated_from_the_list(): void

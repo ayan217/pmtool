@@ -1,12 +1,19 @@
 @props(['date', 'type' => null, 'overdue' => false])
 
+@php
+    $when = $date?->timezone(config('app.timezone'))->format('M j, Y, g:i A');
+@endphp
+
 @if ($date)
-    <div {{ $attributes }}>
+    <div {{ $attributes->class(['deadline', 'is-overdue' => $overdue]) }}>
         @if ($type)
-            <span class="badge {{ $type->badgeClass() }} me-1">{{ $type->shortLabel() }}</span>
+            <span class="badge {{ $type->badgeClass() }} deadline-type">{{ $type->shortLabel() }}</span>
         @endif
-        <span class="{{ $overdue ? 'deadline-overdue' : '' }}">
-            {{ $overdue ? 'OVERDUE · ' : '' }}{{ $date->timezone(config('app.timezone'))->format('M j, Y, g:i A') }}
+        <span class="deadline-text">
+            @if ($overdue)
+                <span class="deadline-flag">OVERDUE</span><span class="deadline-dot"> · </span>
+            @endif
+            <span class="deadline-when">{{ $when }}</span>
         </span>
     </div>
 @else
