@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pmtool-static-v1';
+const CACHE_NAME = 'pmtool-static-v2';
 const PRECACHE = [
     '/offline.html',
     '/css/app.css',

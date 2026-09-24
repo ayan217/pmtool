@@ -280,6 +280,70 @@
         window.bootstrap.Modal.getOrCreateInstance(element).show();
     });
 
+    function closeStatusEditor(editor) {
+        const form = editor.querySelector('[data-pm-status-form]');
+        const trigger = editor.querySelector('[data-pm-status-open]');
+        const select = form?.querySelector('select');
+
+        if (select?.dataset.original) {
+            select.value = select.dataset.original;
+        }
+
+        form?.setAttribute('hidden', '');
+        trigger?.removeAttribute('hidden');
+        trigger?.setAttribute('aria-expanded', 'false');
+    }
+
+    function openStatusEditor(editor) {
+        document.querySelectorAll('[data-pm-status-editor]').forEach((other) => {
+            if (other !== editor) {
+                closeStatusEditor(other);
+            }
+        });
+
+        const form = editor.querySelector('[data-pm-status-form]');
+        const trigger = editor.querySelector('[data-pm-status-open]');
+
+        form?.removeAttribute('hidden');
+        trigger?.setAttribute('hidden', '');
+        trigger?.setAttribute('aria-expanded', 'true');
+        form?.querySelector('select')?.focus();
+    }
+
+    document.addEventListener('click', (event) => {
+        const openButton = event.target.closest('[data-pm-status-open]');
+        if (openButton) {
+            event.preventDefault();
+            const editor = openButton.closest('[data-pm-status-editor]');
+            if (editor) {
+                openStatusEditor(editor);
+            }
+            return;
+        }
+
+        const cancelButton = event.target.closest('[data-pm-status-cancel]');
+        if (cancelButton) {
+            event.preventDefault();
+            const editor = cancelButton.closest('[data-pm-status-editor]');
+            if (editor) {
+                closeStatusEditor(editor);
+            }
+            return;
+        }
+
+        if (!event.target.closest('[data-pm-status-editor]')) {
+            document.querySelectorAll('[data-pm-status-editor]').forEach(closeStatusEditor);
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') {
+            return;
+        }
+
+        document.querySelectorAll('[data-pm-status-editor]').forEach(closeStatusEditor);
+    });
+
     document.querySelectorAll('[data-pm-back]').forEach((button) => {
         button.addEventListener('click', () => {
             const fallback = button.getAttribute('data-fallback') || '/';

@@ -158,9 +158,14 @@ class TaskTest extends TestCase
             ->get(route('tasks.index'))
             ->assertOk()
             ->assertSee('Inline status task')
+            ->assertSee('data-pm-status-open', false)
+            ->assertSee('bg-secondary', false)
             ->assertSee('name="status"', false)
             ->assertSee('>Save</button>', false)
-            ->assertSee(route('tasks.status.update', $task), false);
+            ->assertSee(route('tasks.status.update', $task), false)
+            ->assertSee('bi-eye', false)
+            ->assertSee('bi-pencil', false)
+            ->assertDontSee(route('tasks.complete', $task), false);
     }
 
     public function test_task_status_can_be_updated_from_the_list(): void

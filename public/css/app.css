@@ -134,12 +134,47 @@ body.app-body {
     border-bottom-color: var(--pm-line);
 }
 
+.task-status-editor {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.task-status-trigger {
+    display: inline-flex;
+    align-items: center;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+.task-status-trigger .badge {
+    cursor: pointer;
+}
+
 .task-status-form {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     min-width: 12.5rem;
+}
+
+.task-status-form[hidden] {
+    display: none;
 }
 
 .task-status-form .form-select {
     min-width: 8.5rem;
+}
+
+.task-actions .btn {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .task-link {
@@ -330,6 +365,11 @@ body.app-body {
 
     .quick-filters .btn {
         flex: 0 0 auto;
+    }
+
+    .task-actions .btn {
+        width: 2.5rem;
+        height: 2.5rem;
     }
 
     .table-responsive,
