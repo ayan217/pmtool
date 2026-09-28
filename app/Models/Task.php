@@ -291,7 +291,13 @@ class Task extends Model
 
         $hours = (int) max(1, round($minutes / 60));
 
-        return $hours.' '.Str::plural('hour', $hours);
+        if ($hours < 24) {
+            return $hours.' '.Str::plural('hour', $hours);
+        }
+
+        $days = (int) max(1, round($hours / 24));
+
+        return $days.' '.Str::plural('day', $days);
     }
 
     /**

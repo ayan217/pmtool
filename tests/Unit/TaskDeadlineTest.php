@@ -47,6 +47,21 @@ class TaskDeadlineTest extends TestCase
         $this->assertSame('5 hours', $task->remainingHoursLabel());
     }
 
+    public function test_remaining_hours_label_uses_days_after_twenty_four_hours(): void
+    {
+        $this->assertSame('23 hours', Task::factory()->create([
+            'dev_deadline' => now()->addHours(23),
+        ])->remainingHoursLabel());
+
+        $this->assertSame('1 day', Task::factory()->create([
+            'dev_deadline' => now()->addHours(24),
+        ])->remainingHoursLabel());
+
+        $this->assertSame('11 days', Task::factory()->create([
+            'dev_deadline' => now()->addHours(270),
+        ])->remainingHoursLabel());
+    }
+
     public function test_completed_tasks_are_ordered_after_open_work(): void
     {
         $openLater = Task::factory()->create([
