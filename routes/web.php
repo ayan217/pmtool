@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/tasks/{task}/reminders', [TaskReminderController::class, 'store'])->name('tasks.reminders.store');
 
     Route::post('/tasks/{task}/attachments', [TaskAttachmentController::class, 'store'])->name('tasks.attachments.store');
+    Route::get('/tasks/{task}/attachments/{attachment}/view', [TaskAttachmentController::class, 'show'])->name('tasks.attachments.show');
+    Route::get('/tasks/{task}/attachments/{attachment}/preview', [TaskAttachmentController::class, 'preview'])->name('tasks.attachments.preview');
     Route::get('/tasks/{task}/attachments/{attachment}', [TaskAttachmentController::class, 'download'])->name('tasks.attachments.download');
     Route::delete('/tasks/{task}/attachments/{attachment}', [TaskAttachmentController::class, 'destroy'])->name('tasks.attachments.destroy');
 

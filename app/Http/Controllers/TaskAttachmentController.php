@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTaskAttachmentRequest;
 use App\Models\Task;
 use App\Models\TaskAttachment;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -18,6 +19,28 @@ class TaskAttachmentController extends Controller
         $task->touch();
 
         return back()->with('success', 'Documents attached.');
+    }
+
+    public function show(Task $task, TaskAttachment $attachment): View|RedirectResponse
+    {
+        abort_unless($attachment->task_id === $task->id, 404);
+
+        $this->authorize('view', $task);
+
+        if (! $attachment->existsOnDisk()) {
+            return back()->with('error', 'This file is no longer on the server. Re-upload it after Coolify persistent storage is attached.');
+        }
+
+        return view('tasks.attachments.show', compact('task', 'attachment'));
+    }
+
+    public function preview(Task $task, TaskAttachment $attachment): StreamedResponse
+    {
+        abort_unless($attachment->task_id === $task->id, 404);
+
+        $this->authorize('view', $task);
+
+        return $attachment->inlineResponse();
     }
 
     public function download(Task $task, TaskAttachment $attachment): StreamedResponse|RedirectResponse

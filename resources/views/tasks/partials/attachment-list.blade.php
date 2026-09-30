@@ -6,7 +6,7 @@
                     <i class="bi {{ $attachment->icon() }}"></i>
                     <div class="min-w-0">
                         @if ($attachment->existsOnDisk())
-                            <a href="{{ route('tasks.attachments.download', [$task, $attachment]) }}" class="task-link text-break">{{ $attachment->original_name }}</a>
+                            <a href="{{ $attachment->isPreviewable() ? route('tasks.attachments.show', [$task, $attachment]) : route('tasks.attachments.download', [$task, $attachment]) }}" class="task-link text-break">{{ $attachment->original_name }}</a>
                             <div class="small text-secondary">{{ $attachment->humanSize() }}</div>
                         @else
                             <div class="task-link text-break">{{ $attachment->original_name }}</div>
@@ -14,15 +14,29 @@
                         @endif
                     </div>
                 </div>
-                @unless ($readOnly ?? false)
-                    <button type="submit" class="btn btn-sm btn-outline-danger" form="delete-attachment-{{ $attachment->id }}">Remove</button>
-                    @push('forms')
-                        <form id="delete-attachment-{{ $attachment->id }}" method="POST" action="{{ route('tasks.attachments.destroy', [$task, $attachment]) }}" data-confirm-form="Remove this document?">
-                            @csrf
-                            @method('DELETE')
-                        </form>
-                    @endpush
-                @endunless
+                <div class="d-flex flex-wrap align-items-center gap-1 attachment-actions">
+                    @if ($attachment->existsOnDisk())
+                        @if ($attachment->isPreviewable())
+                            <a href="{{ route('tasks.attachments.show', [$task, $attachment]) }}" class="btn btn-sm btn-outline-secondary" title="View" aria-label="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        @endif
+                        <a href="{{ route('tasks.attachments.download', [$task, $attachment]) }}" class="btn btn-sm btn-outline-dark" title="Download" aria-label="Download">
+                            <i class="bi bi-download"></i>
+                        </a>
+                    @endif
+                    @unless ($readOnly ?? false)
+                        <button type="submit" class="btn btn-sm btn-outline-danger" form="delete-attachment-{{ $attachment->id }}" title="Remove" aria-label="Remove">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        @push('forms')
+                            <form id="delete-attachment-{{ $attachment->id }}" method="POST" action="{{ route('tasks.attachments.destroy', [$task, $attachment]) }}" data-confirm-form="Remove this document?">
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                        @endpush
+                    @endunless
+                </div>
             </li>
         @endforeach
     </ul>

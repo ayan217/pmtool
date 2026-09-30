@@ -117,6 +117,80 @@ class TaskAttachmentTest extends TestCase
             ->assertDownload('invoice.pdf');
     }
 
+    public function test_pdf_image_and_video_can_be_viewed_in_the_app(): void
+    {
+        $task = Task::factory()->create();
+        $task->storeAttachments([
+            UploadedFile::fake()->create('brief.pdf', 40, 'application/pdf'),
+            UploadedFile::fake()->image('photo.jpg', 20, 20),
+            UploadedFile::fake()->create('clip.mp4', 50, 'video/mp4'),
+        ]);
+
+        $pdf = $task->attachments()->where('original_name', 'brief.pdf')->first();
+        $image = $task->attachments()->where('original_name', 'photo.jpg')->first();
+        $video = $task->attachments()->where('original_name', 'clip.mp4')->first();
+
+        $this->assertTrue($pdf->isPdf());
+        $this->assertTrue($image->isImage());
+        $this->assertTrue($video->isVideo());
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.show', $task))
+            ->assertOk()
+            ->assertSee(route('tasks.attachments.show', [$task, $pdf]), false)
+            ->assertSee(route('tasks.attachments.download', [$task, $pdf]), false);
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.attachments.show', [$task, $pdf]))
+            ->assertOk()
+            ->assertSee('brief.pdf')
+            ->assertSee('Download')
+            ->assertSee('<iframe', false)
+            ->assertSee(route('tasks.attachments.preview', [$task, $pdf]), false);
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.attachments.show', [$task, $image]))
+            ->assertOk()
+            ->assertSee('<img', false)
+            ->assertSee(route('tasks.attachments.preview', [$task, $image]), false);
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.attachments.show', [$task, $video]))
+            ->assertOk()
+            ->assertSee('<video', false)
+            ->assertSee(route('tasks.attachments.preview', [$task, $video]), false);
+    }
+
+    public function test_preview_streams_the_file_inline(): void
+    {
+        $task = Task::factory()->create();
+        $task->storeAttachments([
+            UploadedFile::fake()->create('brief.pdf', 40, 'application/pdf'),
+        ]);
+        $attachment = $task->attachments()->first();
+
+        $response = $this->actingAs($this->user)
+            ->get(route('tasks.attachments.preview', [$task, $attachment]))
+            ->assertOk();
+
+        $this->assertStringContainsString('inline', strtolower((string) $response->headers->get('content-disposition')));
+    }
+
+    public function test_guests_cannot_view_or_preview_documents(): void
+    {
+        $task = Task::factory()->create();
+        $task->storeAttachments([
+            UploadedFile::fake()->create('secret.pdf', 10, 'application/pdf'),
+        ]);
+        $attachment = $task->attachments()->first();
+
+        $this->get(route('tasks.attachments.show', [$task, $attachment]))
+            ->assertRedirect(route('login'));
+
+        $this->get(route('tasks.attachments.preview', [$task, $attachment]))
+            ->assertRedirect(route('login'));
+    }
+
     public function test_missing_document_files_redirect_instead_of_downloading(): void
     {
         $task = Task::factory()->create();

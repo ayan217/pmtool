@@ -69,9 +69,39 @@ class TaskAttachment extends Model
             'xls', 'xlsx', 'csv' => 'bi-file-earmark-excel',
             'ppt', 'pptx' => 'bi-file-earmark-ppt',
             'zip', 'rar', '7z' => 'bi-file-earmark-zip',
-            'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg' => 'bi-file-earmark-image',
+            'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'avif' => 'bi-file-earmark-image',
+            'mp4', 'webm', 'mov', 'ogg', 'ogv', 'm4v', 'avi' => 'bi-film',
             default => 'bi-file-earmark-text',
         };
+    }
+
+    public function isPdf(): bool
+    {
+        return $this->extension() === 'pdf'
+            || str_contains(strtolower((string) $this->mime_type), 'pdf');
+    }
+
+    public function isImage(): bool
+    {
+        if (str_starts_with(strtolower((string) $this->mime_type), 'image/')) {
+            return true;
+        }
+
+        return in_array($this->extension(), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'avif'], true);
+    }
+
+    public function isVideo(): bool
+    {
+        if (str_starts_with(strtolower((string) $this->mime_type), 'video/')) {
+            return true;
+        }
+
+        return in_array($this->extension(), ['mp4', 'webm', 'mov', 'ogg', 'ogv', 'm4v', 'avi'], true);
+    }
+
+    public function isPreviewable(): bool
+    {
+        return $this->isImage() || $this->isVideo() || $this->isPdf();
     }
 
     public function existsOnDisk(): bool
@@ -84,6 +114,20 @@ class TaskAttachment extends Model
         abort_unless($this->existsOnDisk(), 404);
 
         return Storage::disk($this->disk)->download($this->path, $this->original_name);
+    }
+
+    public function inlineResponse(): StreamedResponse
+    {
+        abort_unless($this->existsOnDisk(), 404);
+
+        $headers = [];
+        $mime = trim((string) $this->mime_type);
+
+        if ($mime !== '') {
+            $headers['Content-Type'] = $mime;
+        }
+
+        return Storage::disk($this->disk)->response($this->path, $this->original_name, $headers);
     }
 
     public function deleteFile(): void
