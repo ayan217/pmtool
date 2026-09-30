@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\TaskPriority;
 use App\Mail\StatusReminderMail;
 use App\Models\EmailLog;
 use App\Models\Project;
@@ -36,12 +37,18 @@ class StatusReminderTest extends TestCase
 
         $this->assertStringContainsString('{task.title}', $template['body']);
         $this->assertStringContainsString('{project.name}', $template['body']);
+        $this->assertStringContainsString('{task.priority}', $template['body']);
+        $this->assertStringContainsString('please share the status of this task, {remaining.hours}', $template['body']);
+        $this->assertStringNotContainsString('the deadline is in', $template['body']);
 
         $this->actingAs($this->user)
             ->get(route('email-templates.edit'))
             ->assertOk()
             ->assertSee('Task: {task.title}', false)
-            ->assertSee('Project: {project.name}', false);
+            ->assertSee('Project: {project.name}', false)
+            ->assertSee('Priority: {task.priority}', false)
+            ->assertSee('out of 7 days, 1 day is remaining', false)
+            ->assertSee('out of 8 hours, 1 hour is remaining', false);
     }
 
     public function test_saved_legacy_template_is_upgraded_to_include_title_and_project(): void
@@ -56,6 +63,38 @@ class StatusReminderTest extends TestCase
 
         $this->assertStringContainsString('Task: {task.title}', $template['body']);
         $this->assertStringContainsString('Project: {project.name}', $template['body']);
+        $this->assertStringContainsString('Priority: {task.priority}', $template['body']);
+        $this->assertStringContainsString('please share the status of this task, {remaining.hours}', $template['body']);
+        $this->assertStringNotContainsString('the deadline is in', $template['body']);
+    }
+
+    public function test_saved_title_and_project_template_is_upgraded_to_include_priority(): void
+    {
+        app(StatusReminderTemplateService::class)->update(
+            $this->user,
+            '{task.title}',
+            "Task: {task.title}\nProject: {project.name}\n\nhi team,\n\nplease share the status of this task, the deadline is in {remaining.hours}, if any delay is happening please contact me personally over call or whatsapp.\n\n{task.des}",
+        );
+
+        $template = app(StatusReminderTemplateService::class)->forUser($this->user->fresh());
+
+        $this->assertStringContainsString('Priority: {task.priority}', $template['body']);
+        $this->assertStringContainsString('please share the status of this task, {remaining.hours}', $template['body']);
+        $this->assertStringNotContainsString('the deadline is in', $template['body']);
+    }
+
+    public function test_saved_priority_template_is_upgraded_to_progress_remaining_wording(): void
+    {
+        app(StatusReminderTemplateService::class)->update(
+            $this->user,
+            '{task.title}',
+            "Task: {task.title}\nProject: {project.name}\nPriority: {task.priority}\n\nhi team,\n\nplease share the status of this task, the deadline is in {remaining.hours}, if any delay is happening please contact me personally over call or whatsapp.\n\n{task.des}",
+        );
+
+        $template = app(StatusReminderTemplateService::class)->forUser($this->user->fresh());
+
+        $this->assertStringContainsString('please share the status of this task, {remaining.hours}', $template['body']);
+        $this->assertStringNotContainsString('the deadline is in', $template['body']);
     }
 
     public function test_email_template_can_be_updated(): void
@@ -100,7 +139,7 @@ class StatusReminderTest extends TestCase
             return $mail->task->is($task)
                 && $mail->subjectLine === 'API handover'
                 && str_contains($mail->bodyText, 'Finish the remaining endpoints.')
-                && str_contains($mail->bodyText, '5 hours')
+                && str_contains($mail->bodyText, 'out of 5 hours, 5 hours are remaining')
                 && $mail->hasTo('rahul@example.com');
         });
 
@@ -118,6 +157,7 @@ class StatusReminderTest extends TestCase
         $task = Task::factory()->create([
             'title' => 'API handover',
             'project_id' => $project->id,
+            'priority' => TaskPriority::Urgent,
         ]);
         $task->syncDevelopers([
             [
@@ -138,20 +178,24 @@ class StatusReminderTest extends TestCase
 
             return str_contains($mail->bodyText, 'Task: API handover')
                 && str_contains($mail->bodyText, 'Project: CRM Tool')
+                && str_contains($mail->bodyText, 'Priority: Urgent')
                 && str_contains($html, 'Task: API handover')
-                && str_contains($html, 'Project: CRM Tool');
+                && str_contains($html, 'Project: CRM Tool')
+                && str_contains($html, 'Priority: Urgent');
         });
 
         $log = EmailLog::query()->first();
         $this->assertNotNull($log);
         $this->assertStringContainsString('Task: API handover', $log->body);
         $this->assertStringContainsString('Project: CRM Tool', $log->body);
+        $this->assertStringContainsString('Priority: Urgent', $log->body);
 
         $this->actingAs($this->user)
             ->get(route('email-report.show', $log))
             ->assertOk()
             ->assertSee('Task: API handover', false)
-            ->assertSee('Project: CRM Tool', false);
+            ->assertSee('Project: CRM Tool', false)
+            ->assertSee('Priority: Urgent', false);
     }
 
     public function test_email_reminder_attaches_task_documents(): void

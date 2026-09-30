@@ -283,21 +283,33 @@ class Task extends Model
                 : 'no deadline';
         }
 
-        $minutes = (int) round(abs(now()->diffInMinutes($upcoming)));
+        $remainingMinutes = (int) round(abs(now()->diffInMinutes($upcoming)));
+        $start = $this->created_at instanceof Carbon ? $this->created_at : now();
+        $totalMinutes = (int) round(abs($start->diffInMinutes($upcoming)));
+        $totalMinutes = max($totalMinutes, $remainingMinutes, 1);
 
-        if ($minutes < 60) {
-            return 'less than 1 hour';
+        if ($totalMinutes >= 24 * 60) {
+            $total = max(1, (int) round($totalMinutes / (24 * 60)));
+            $remaining = (int) round($remainingMinutes / (24 * 60));
+            $remainingText = $remaining < 1
+                ? 'less than 1 day is remaining'
+                : $remaining.' '.Str::plural('day', $remaining).' '.$this->remainingVerb($remaining);
+
+            return 'out of '.$total.' '.Str::plural('day', $total).', '.$remainingText;
         }
 
-        $hours = (int) max(1, round($minutes / 60));
+        $total = max(1, (int) round($totalMinutes / 60));
+        $remaining = (int) round($remainingMinutes / 60);
+        $remainingText = $remainingMinutes < 60 || $remaining < 1
+            ? 'less than 1 hour is remaining'
+            : $remaining.' '.Str::plural('hour', $remaining).' '.$this->remainingVerb($remaining);
 
-        if ($hours < 24) {
-            return $hours.' '.Str::plural('hour', $hours);
-        }
+        return 'out of '.$total.' '.Str::plural('hour', $total).', '.$remainingText;
+    }
 
-        $days = (int) max(1, round($hours / 24));
-
-        return $days.' '.Str::plural('day', $days);
+    protected function remainingVerb(int $count): string
+    {
+        return $count === 1 ? 'is remaining' : 'are remaining';
     }
 
     /**

@@ -64,18 +64,31 @@ class EmailLog extends Model
         if (
             ! $this->task
             || ! in_array($this->type, [EmailLogType::StatusReminder, EmailLogType::DailyReminder], true)
-            || str_contains($body, 'Task: '.$this->task->title)
         ) {
             return $body;
         }
 
         $this->loadMissing('task.project');
+        $priorityLine = 'Priority: '.$this->task->priority->label();
+
+        if (str_contains($body, 'Task: '.$this->task->title)) {
+            if (str_contains($body, 'Priority: ')) {
+                return $body;
+            }
+
+            if (preg_match('/^Project: .+$/m', $body) === 1) {
+                return (string) preg_replace('/^(Project: .+)$/m', '$1'."\n".$priorityLine, $body, 1);
+            }
+
+            return $priorityLine."\n\n".$body;
+        }
+
         $project = trim((string) ($this->task->project?->name ?? ''));
-        $header = implode("\n", [
+
+        return implode("\n", [
             'Task: '.$this->task->title,
             'Project: '.($project !== '' ? $project : 'No project'),
-        ]);
-
-        return $header."\n\n".$body;
+            $priorityLine,
+        ])."\n\n".$body;
     }
 }

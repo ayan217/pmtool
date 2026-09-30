@@ -31,10 +31,12 @@
                 </div>
 
                 <div class="small text-secondary mb-4">
-                    Task title and project name are part of the default body. Available placeholders:
+                    Task title, project name, and priority are part of the default body. Remaining time is written like <code>out of 7 days, 1 day is remaining</code> or <code>out of 8 hours, 1 hour is remaining</code>.
+                    Available placeholders:
                     <code>{task.title}</code>,
                     <code>{project.name}</code>,
                     <code>{task.project}</code>,
+                    <code>{task.priority}</code>,
                     <code>{task.des}</code>,
                     <code>{remaining.hours}</code>
                 </div>

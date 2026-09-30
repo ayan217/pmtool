@@ -44,21 +44,34 @@ class TaskDeadlineTest extends TestCase
             'client_deadline' => now()->addHours(12),
         ]);
 
-        $this->assertSame('5 hours', $task->remainingHoursLabel());
+        $this->assertSame('out of 5 hours, 5 hours are remaining', $task->remainingHoursLabel());
     }
 
     public function test_remaining_hours_label_uses_days_after_twenty_four_hours(): void
     {
-        $this->assertSame('23 hours', Task::factory()->create([
+        $this->assertSame('out of 23 hours, 23 hours are remaining', Task::factory()->create([
             'dev_deadline' => now()->addHours(23),
         ])->remainingHoursLabel());
 
-        $this->assertSame('1 day', Task::factory()->create([
+        $this->assertSame('out of 1 day, 1 day is remaining', Task::factory()->create([
             'dev_deadline' => now()->addHours(24),
         ])->remainingHoursLabel());
 
-        $this->assertSame('11 days', Task::factory()->create([
+        $this->assertSame('out of 11 days, 11 days are remaining', Task::factory()->create([
             'dev_deadline' => now()->addHours(270),
+        ])->remainingHoursLabel());
+    }
+
+    public function test_remaining_hours_label_shows_elapsed_window(): void
+    {
+        $this->assertSame('out of 8 hours, 1 hour is remaining', Task::factory()->create([
+            'created_at' => now()->subHours(7),
+            'dev_deadline' => now()->addHour(),
+        ])->remainingHoursLabel());
+
+        $this->assertSame('out of 7 days, 1 day is remaining', Task::factory()->create([
+            'created_at' => now()->subDays(6),
+            'dev_deadline' => now()->addDay(),
         ])->remainingHoursLabel());
     }
 
