@@ -146,7 +146,8 @@ class TaskAttachmentTest extends TestCase
             ->assertSee('brief.pdf')
             ->assertSee('Download')
             ->assertSee('<iframe', false)
-            ->assertSee(route('tasks.attachments.preview', [$task, $pdf]), false);
+            ->assertSee('attachment-pdf-shell', false)
+            ->assertSee(route('tasks.attachments.preview', [$task, $pdf]).'#view=FitH', false);
 
         $this->actingAs($this->user)
             ->get(route('tasks.attachments.show', [$task, $image]))

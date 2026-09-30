@@ -220,6 +220,14 @@ body.app-body {
     justify-content: center;
 }
 
+.attachment-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: calc(100dvh - 3rem);
+    min-height: 0;
+}
+
 .attachment-viewer {
     min-height: 12rem;
 }
@@ -238,12 +246,25 @@ body.app-body {
     background: #111;
 }
 
+.attachment-pdf-shell {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 28rem;
+    background: #525659;
+    border: 1px solid var(--pm-line);
+    border-radius: 0.9rem;
+    overflow: hidden;
+}
+
 .attachment-preview-frame {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
-    height: min(80vh, 52rem);
+    height: 100%;
     border: 0;
-    background: #fff;
+    background: #525659;
 }
 
 .modal {
@@ -449,6 +470,14 @@ body.app-body {
     .attachment-actions .btn {
         width: 2.5rem;
         height: 2.5rem;
+    }
+
+    .attachment-page {
+        height: calc(100dvh - 10.25rem - env(safe-area-inset-bottom, 0px));
+    }
+
+    .attachment-pdf-shell {
+        min-height: 22rem;
     }
 
     .table-responsive,

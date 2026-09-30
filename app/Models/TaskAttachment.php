@@ -123,7 +123,9 @@ class TaskAttachment extends Model
         $headers = [];
         $mime = trim((string) $this->mime_type);
 
-        if ($mime !== '') {
+        if ($this->isPdf()) {
+            $headers['Content-Type'] = 'application/pdf';
+        } elseif ($mime !== '') {
             $headers['Content-Type'] = $mime;
         }
 
