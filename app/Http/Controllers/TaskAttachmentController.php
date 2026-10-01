@@ -31,7 +31,10 @@ class TaskAttachmentController extends Controller
             return back()->with('error', 'This file is no longer on the server. Re-upload it after Coolify persistent storage is attached.');
         }
 
-        return view('tasks.attachments.show', compact('task', 'attachment'));
+        $task->loadMissing('attachments');
+        $navigation = $task->attachmentNavigation($attachment);
+
+        return view('tasks.attachments.show', compact('task', 'attachment', 'navigation'));
     }
 
     public function preview(Task $task, TaskAttachment $attachment): StreamedResponse

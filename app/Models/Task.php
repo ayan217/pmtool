@@ -82,6 +82,31 @@ class Task extends Model
     }
 
     /**
+     * @return array{previous: ?TaskAttachment, next: ?TaskAttachment, position: int, total: int}
+     */
+    public function attachmentNavigation(TaskAttachment $current): array
+    {
+        $this->loadMissing('attachments');
+
+        $siblings = $this->attachments
+            ->filter(fn (TaskAttachment $item) => $item->existsOnDisk())
+            ->values();
+        $total = $siblings->count();
+        $index = $siblings->search(fn (TaskAttachment $item) => $item->is($current));
+
+        if ($index === false) {
+            $index = 0;
+        }
+
+        return [
+            'previous' => $total > 1 ? $siblings[($index - 1 + $total) % $total] : null,
+            'next' => $total > 1 ? $siblings[($index + 1) % $total] : null,
+            'position' => $index + 1,
+            'total' => $total,
+        ];
+    }
+
+    /**
      * @param  list<array<string, mixed>>  $developers
      */
     public function syncDevelopers(array $developers): void

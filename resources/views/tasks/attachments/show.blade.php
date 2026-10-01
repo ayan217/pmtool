@@ -4,18 +4,51 @@
 
 @section('content')
 
-    <div class="attachment-page">
+    <div
+        class="attachment-page"
+        @if ($navigation['previous'] && $navigation['next'])
+            data-prev-url="{{ route('tasks.attachments.show', [$task, $navigation['previous']]) }}"
+            data-next-url="{{ route('tasks.attachments.show', [$task, $navigation['next']]) }}"
+        @endif
+    >
         <x-back-button :fallback="route('tasks.show', $task)" />
 
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
             <div class="min-w-0">
                 <p class="page-kicker mb-1">{{ $task->title }}</p>
                 <h1 class="page-title h3 mb-1 text-break">{{ $attachment->original_name }}</h1>
-                <div class="small text-secondary">{{ $attachment->humanSize() }}</div>
+                <div class="small text-secondary">
+                    {{ $attachment->humanSize() }}
+                    @if ($navigation['total'] > 1)
+                        · {{ $navigation['position'] }} of {{ $navigation['total'] }}
+                    @endif
+                </div>
             </div>
-            <a href="{{ route('tasks.attachments.download', [$task, $attachment]) }}" class="btn btn-dark">
-                <i class="bi bi-download"></i> Download
-            </a>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                @if ($navigation['previous'])
+                    <a
+                        href="{{ route('tasks.attachments.show', [$task, $navigation['previous']]) }}"
+                        class="btn btn-outline-secondary"
+                        title="{{ $navigation['previous']->original_name }}"
+                    >
+                        <i class="bi bi-chevron-left"></i>
+                        <span class="d-none d-sm-inline">Previous</span>
+                    </a>
+                @endif
+                @if ($navigation['next'])
+                    <a
+                        href="{{ route('tasks.attachments.show', [$task, $navigation['next']]) }}"
+                        class="btn btn-outline-secondary"
+                        title="{{ $navigation['next']->original_name }}"
+                    >
+                        <span class="d-none d-sm-inline">Next</span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
+                <a href="{{ route('tasks.attachments.download', [$task, $attachment]) }}" class="btn btn-dark">
+                    <i class="bi bi-download"></i> Download
+                </a>
+            </div>
         </div>
 
         @if ($attachment->isPdf())
@@ -47,17 +80,14 @@
     </div>
 @endsection
 
-@if ($attachment->isPdf())
-    @push('scripts')
-        <script>
-            (() => {
-                const shell = document.querySelector('.attachment-pdf-shell');
-                const frame = shell?.querySelector('.attachment-preview-frame');
+@push('scripts')
+    <script>
+        (() => {
+            const page = document.querySelector('.attachment-page');
+            const shell = document.querySelector('.attachment-pdf-shell');
+            const frame = shell?.querySelector('.attachment-preview-frame');
 
-                if (!shell || !frame) {
-                    return;
-                }
-
+            if (frame && shell) {
                 const fit = () => {
                     const rect = shell.getBoundingClientRect();
                     const width = Math.max(320, Math.round(rect.width));
@@ -71,7 +101,34 @@
 
                 fit();
                 window.addEventListener('resize', fit);
-            })();
-        </script>
-    @endpush
-@endif
+            }
+
+            if (!page?.dataset.prevUrl || !page.dataset.nextUrl) {
+                return;
+            }
+
+            document.addEventListener('keydown', (event) => {
+                if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) {
+                    return;
+                }
+
+                const target = event.target;
+
+                if (target instanceof HTMLElement && (
+                    target.isContentEditable
+                    || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+                )) {
+                    return;
+                }
+
+                if (event.key === 'ArrowLeft') {
+                    window.location.href = page.dataset.prevUrl;
+                }
+
+                if (event.key === 'ArrowRight') {
+                    window.location.href = page.dataset.nextUrl;
+                }
+            });
+        })();
+    </script>
+@endpush

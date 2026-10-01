@@ -162,6 +162,50 @@ class TaskAttachmentTest extends TestCase
             ->assertSee(route('tasks.attachments.preview', [$task, $video]), false);
     }
 
+    public function test_viewer_can_move_to_the_next_and_previous_attachment(): void
+    {
+        $task = Task::factory()->create();
+        $task->storeAttachments([
+            UploadedFile::fake()->create('brief.pdf', 40, 'application/pdf'),
+            UploadedFile::fake()->image('photo.jpg', 20, 20),
+            UploadedFile::fake()->create('notes.txt', 10, 'text/plain'),
+        ]);
+
+        [$first, $second, $third] = $task->fresh()->attachments->all();
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.attachments.show', [$task, $first]))
+            ->assertOk()
+            ->assertSee('1 of 3', false)
+            ->assertSee('Previous')
+            ->assertSee('Next')
+            ->assertSee(route('tasks.attachments.show', [$task, $second]), false)
+            ->assertSee(route('tasks.attachments.show', [$task, $third]), false);
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.attachments.show', [$task, $second]))
+            ->assertOk()
+            ->assertSee('2 of 3', false)
+            ->assertSee(route('tasks.attachments.show', [$task, $first]), false)
+            ->assertSee(route('tasks.attachments.show', [$task, $third]), false);
+    }
+
+    public function test_viewer_hides_navigation_when_there_is_only_one_attachment(): void
+    {
+        $task = Task::factory()->create();
+        $task->storeAttachments([
+            UploadedFile::fake()->create('brief.pdf', 40, 'application/pdf'),
+        ]);
+        $attachment = $task->attachments()->first();
+
+        $this->actingAs($this->user)
+            ->get(route('tasks.attachments.show', [$task, $attachment]))
+            ->assertOk()
+            ->assertDontSee('Previous')
+            ->assertDontSee('Next')
+            ->assertDontSee('1 of 1', false);
+    }
+
     public function test_preview_streams_the_file_inline(): void
     {
         $task = Task::factory()->create();
